@@ -1,0 +1,120 @@
+# Copyright 2026 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Self-contained Buildkite TPU pipeline for vllm-omni-torchtpu, ported from
+# vllm-project/vllm-torchtpu (.buildkite/pipeline_build.yml and
+# .buildkite/pipeline_tests.yml). Inert until a Buildkite pipeline with
+# cpu_64_core and Kueue TPU (`kube`) agents is attached to this repository;
+# see .buildkite/README.md.
+
+x-image-build-retry: &image_build_retry
+  automatic:
+    - exit_status: 1
+      limit: 1
+
+x-kube-plugin: &kube_plugin
+  kubernetes:
+    podTemplate: tpu-launcher
+
+x-tpu-step-defaults: &tpu_step
+  depends_on: "build_docker_omni"
+  timeout_in_minutes: 1440
+  agents:
+    queue: "kube"
+
+x-tests-plugin-defaults: &tests_plugin_defaults
+  suite-slug: tpu-ci
+  test-runner: pytest
+  test-file-pattern: "tests_omni/**/{test_*,*_test}.py"
+  install-client: false
+  oidc-lifetime: 7200
+
+x-shape-single: &shape_single "${KUBE_SHAPE_SINGLE:-tpu7x-standard-1t/1x1x1}"
+x-shape-multi: &shape_multi "${KUBE_SHAPE_MULTI:-tpu7x-standard-4t/2x2x1}"
+
+steps:
+  - group: "Build Docker Images"
+    key: "build_docker_group"
+    steps:
+      - label: ":docker: Build and Push Omni CI Image"
+        key: "build_docker_omni"
+        skip: "${OMNI_IMAGE_SKIP:-}"
+        agents:
+          queue: cpu_64_core
+        commands:
+          - bash .buildkite/scripts/setup_docker_env.sh omni
+        retry: *image_build_retry
+
+  - group: "Unit Tests on TPU"
+    steps:
+      # Omni multimodal and diffusion models on the -omni image. The FLUX and
+      # Qwen-Image tests compare against golden files under $HF_HOME/golden;
+      # only $HF_HOME/hub is the shared cache, so the pod stages golden/ from
+      # gs://tpu-commons-ci/golden/.
+      - label: "Unit Tests - Omni (PR)"
+        key: "unit_tests_omni_pr"
+        <<: *tpu_step
+        depends_on: "build_docker_omni"
+        if: 'build.env("NIGHTLY") != "1"'
+        env:
+          SHAPE: *shape_single
+          DOCKER_IMAGE_SUFFIX: "-omni"
+        commands:
+          - &omni_test |
+            .buildkite/kubernetes/run.sh bash -c '
+              bash .buildkite/scripts/stage_model_snapshot.sh gs://tpu-commons-ci/golden/ "$$HF_HOME" &&
+              bktec run'
+        plugins:
+          - *kube_plugin
+          - tests#v1.0.0:
+              <<: *tests_plugin_defaults
+              test-file-pattern: "tests_omni/**/{test_*,*_test}.py"
+              fail-on-no-tests: true
+              test-cmd: "pytest -sv --timeout=1200 -m 'not nightly' --junit-xml={{resultPath}} {{testExamples}}"
+
+      - label: "Unit Tests - Omni (Nightly)"
+        key: "unit_tests_omni_nightly"
+        <<: *tpu_step
+        depends_on: "build_docker_omni"
+        if: 'build.env("NIGHTLY") == "1"'
+        env:
+          SHAPE: *shape_single
+          DOCKER_IMAGE_SUFFIX: "-omni"
+        commands:
+          - *omni_test
+        plugins:
+          - *kube_plugin
+          - tests#v1.0.0:
+              <<: *tests_plugin_defaults
+              test-file-pattern: "tests_omni/**/{test_*,*_test}.py"
+              fail-on-no-tests: true
+              test-cmd: "pytest -sv --timeout=1800 -m 'not multichip' --junit-xml={{resultPath}} {{testExamples}}"
+
+      - label: "Unit Tests - Omni Multichip (Nightly)"
+        key: "unit_tests_omni_multichip_nightly"
+        <<: *tpu_step
+        depends_on: "build_docker_omni"
+        if: 'build.env("NIGHTLY") == "1"'
+        env:
+          SHAPE: *shape_multi
+          DOCKER_IMAGE_SUFFIX: "-omni"
+        commands:
+          - *omni_test
+        plugins:
+          - *kube_plugin
+          - tests#v1.0.0:
+              <<: *tests_plugin_defaults
+              test-file-pattern: "tests_omni/**/{test_*,*_test}.py"
+              fail-on-no-tests: true
+              test-cmd: "pytest -sv --timeout=1800 -m 'multichip' --junit-xml={{resultPath}} {{testExamples}}"

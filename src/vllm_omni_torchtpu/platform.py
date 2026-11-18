@@ -19,10 +19,10 @@ import torch
 from torch_tpu._internal.utils import hardware
 from vllm.logger import init_logger
 from vllm_omni.platforms.interface import OmniPlatform, OmniPlatformEnum
-
 from vllm_torchtpu.env_override import set_libtpu_flag_default
-from vllm_omni_torchtpu.patches import apply_omni_tpu_patches
 from vllm_torchtpu.platforms.tpu_platform import TpuPlatform
+
+from vllm_omni_torchtpu.patches import apply_omni_tpu_patches
 
 logger = init_logger(__name__)
 

@@ -34,6 +34,7 @@ from vllm_omni.diffusion.models.wan2_2.wan2_2_transformer import (
     WanSelfAttention,
 )
 from vllm_omni.diffusion.worker.diffusion_worker import WorkerProc
+from vllm_torchtpu.platforms.tpu_platform import TpuPlatform
 
 from vllm_omni_torchtpu import patches, register_omni_tpu_platform
 from vllm_omni_torchtpu import rope as omni_rope
@@ -66,7 +67,6 @@ from vllm_omni_torchtpu.rope import (
     split_rope_natural_tables,
     wan_self_attention_fused,
 )
-from vllm_torchtpu.platforms.tpu_platform import TpuPlatform
 
 pytestmark = pytest.mark.omni
 

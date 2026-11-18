@@ -16,7 +16,6 @@
 from typing import Any, cast
 
 from vllm_omni.config import OmniModelConfig
-
 from vllm_torchtpu.runner.tpu_runner import TPUModelRunner
 
 

@@ -11,6 +11,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+# Static lint and wheel/sdist checks on ubuntu-latest.
+# Note: CPU pytest execution is intentionally omitted until `tests_omni` guards
+# its autouse `_sync_tpu` TPU synchronize fixture and tags TPU-only tests, so
+# static PR checks stay fast without pulling the full runtime/git stack.
 name: CI
 
 on:
@@ -91,7 +95,7 @@ jobs:
                   "torchtpu_omni": "vllm_omni_torchtpu:register_omni_tpu_platform"
               }
               assert dict(cp["vllm.platform_plugins"]) == {
-                  "torchtpu_omni": "vllm_torchtpu.platforms:register_tpu_platform"
+                  "torchtpu_omni": "vllm_omni_torchtpu:register_tpu_platform_alias"
               }
           print(f"Verified wheel {wheels[0]} ({len(names)} entries)")
           PY

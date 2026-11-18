@@ -35,8 +35,10 @@ We plan to support future hardware.
 
 ## Maintenance
 
-- The `omni` extra pins a vLLM-Omni release; we bump it as new releases ship.
+- The base dependencies in `pyproject.toml` pin a vLLM-Omni release, and
+  maintainers bump it as new releases ship.
 - At each pin bump we recheck the runtime patches in `patches/` and drop
   obsolete ones.
 - Omni tests live in [`tests_omni/`](../tests_omni/).
-- Omni owners in [CODEOWNERS](https://github.com/vllm-project/vllm-torchtpu/blob/main/.github/CODEOWNERS) triage omni issues.
+- Repository maintainers triage omni issues in this repository while standalone
+  `CODEOWNERS` governance is finalized.

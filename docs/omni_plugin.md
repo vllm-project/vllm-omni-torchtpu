@@ -13,14 +13,11 @@ See [ROADMAP.md](ROADMAP.md).
 
 ## Contributing
 
-Before you work on any new feature, bug fix or model in omni:
+Before you work on a new feature, bug fix, or model in `vllm-omni-torchtpu`:
 
-1. Open a [GitHub issue](https://github.com/vllm-project/vllm-torchtpu/issues/new/choose)
-   first. Start the title with `[Omni]`.
-2. Wait for an omni owner to confirm on the issue before you start work.
-   Owners are listed in
-   [CODEOWNERS](https://github.com/vllm-project/vllm-torchtpu/blob/main/.github/CODEOWNERS)
-   for `/src/vllm_omni_torchtpu/`.
-3. Link the issue in your PR and start the PR title with `[Omni]`.
-4. Follow the upstream
-   [CONTRIBUTING.md](https://github.com/vllm-project/vllm-torchtpu/blob/main/CONTRIBUTING.md).
+1. Open an issue in this repository first to propose the change.
+2. Wait for a repository maintainer to confirm the scope on the issue before
+   starting work (standalone `CODEOWNERS` and `CONTRIBUTING.md` policies are
+   pending post-split setup).
+3. Link the issue in your pull request and run the local verification commands
+   in [testing.md](testing.md).

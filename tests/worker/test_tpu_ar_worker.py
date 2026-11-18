@@ -23,13 +23,13 @@ from vllm.config import ParallelConfig
 from vllm.utils.import_utils import resolve_obj_by_qualname
 from vllm_omni.config import OmniModelConfig
 from vllm_omni.worker.mixins import OmniWorkerMixin
+from vllm_torchtpu.runner.tpu_runner import TPUModelRunner
+from vllm_torchtpu.worker.tpu_worker import TPUWorker
 
 from vllm_omni_torchtpu.platform import OmniTpuPlatform
 from vllm_omni_torchtpu.worker.base import OmniTPUWorkerBase
 from vllm_omni_torchtpu.worker.tpu_ar_model_runner import TPUARModelRunner
 from vllm_omni_torchtpu.worker.tpu_ar_worker import TPUARWorker
-from vllm_torchtpu.runner.tpu_runner import TPUModelRunner
-from vllm_torchtpu.worker.tpu_worker import TPUWorker
 
 pytestmark = pytest.mark.omni
 

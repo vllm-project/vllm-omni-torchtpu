@@ -61,7 +61,6 @@ from __future__ import annotations
 from typing import Any
 
 import torch
-
 from vllm_torchtpu.logger import init_logger
 
 logger = init_logger(__name__)

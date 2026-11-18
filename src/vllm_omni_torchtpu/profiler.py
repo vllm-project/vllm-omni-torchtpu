@@ -41,7 +41,6 @@ from typing import Any, NamedTuple
 import torch
 from torch_tpu._internal.profiler import TpuProfilerConfig
 from vllm_omni.profiler.omni_torch_profiler import OmniTorchProfilerWrapper
-
 from vllm_torchtpu import profiler_trace
 from vllm_torchtpu.logger import init_logger
 from vllm_torchtpu.tracing.options import resolve_profile_dir_and_opts

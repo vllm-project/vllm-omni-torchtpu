@@ -21,9 +21,9 @@ import torch
 from vllm.sequence import IntermediateTensors
 from vllm_omni.config import OmniModelConfig
 from vllm_omni.model_executor.models.output_templates import OmniOutput
+from vllm_torchtpu.runner.tpu_runner import TPUModelRunner
 
 from vllm_omni_torchtpu.worker.tpu_ar_model_runner import TPUARModelRunner
-from vllm_torchtpu.runner.tpu_runner import TPUModelRunner
 
 pytestmark = pytest.mark.omni
 

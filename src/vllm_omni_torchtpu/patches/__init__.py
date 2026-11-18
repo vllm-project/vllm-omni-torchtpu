@@ -30,7 +30,6 @@ from functools import cache as run_once
 from typing import Any
 
 import torch
-
 from vllm_torchtpu.logger import init_logger
 
 logger = init_logger(__name__)
@@ -573,12 +572,12 @@ def _patch_ltx2_split_rope() -> None:
     #   - synchronize_tensors materializes the cached tables once.
     # -------------------------------------------------------------------------
     from vllm_omni.diffusion.models.ltx2 import ltx2_transformer
+    from vllm_torchtpu.utils import synchronize_tensors
 
     from vllm_omni_torchtpu.rope import (
         apply_split_rotary_half_swap,
         split_rope_natural_tables,
     )
-    from vllm_torchtpu.utils import synchronize_tensors
 
     rope_cls = ltx2_transformer.LTX2AudioVideoRotaryPosEmbed
     if getattr(rope_cls.forward, _SPLIT_ROPE_PATCHED, False):

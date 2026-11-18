@@ -23,6 +23,24 @@ def register_omni_tpu_platform() -> str | None:
     return "vllm_omni_torchtpu.platform.OmniTpuPlatform"
 
 
+def register_tpu_platform_alias() -> str | None:
+    """Alias core's vLLM platform plugin only when selected via VLLM_PLUGINS.
+
+    When ``VLLM_PLUGINS`` is unset (or already includes ``torchtpu``),
+    ``vllm-torchtpu-core``'s ``torchtpu`` entry point activates ``TpuPlatform``
+    on its own, so returning ``None`` keeps plain vLLM processes from seeing
+    two activated out-of-tree platform plugins.
+    """
+    import vllm.envs as envs
+
+    if envs.VLLM_PLUGINS is None or "torchtpu" in envs.VLLM_PLUGINS:
+        return None
+    from vllm_torchtpu.platforms import register_tpu_platform
+
+    return register_tpu_platform()
+
+
 __all__ = [
     "register_omni_tpu_platform",
+    "register_tpu_platform_alias",
 ]

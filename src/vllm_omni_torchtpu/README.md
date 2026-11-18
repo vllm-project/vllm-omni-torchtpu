@@ -2,7 +2,7 @@
 
 This package is the TPU platform plugin for
 [vLLM-Omni](https://github.com/vllm-project/vllm-omni). vLLM-Omni loads it
-through the `vllm_omni.platform_plugins` entry point `torchtpu`
+through the `vllm_omni.platform_plugins` entry point `torchtpu_omni`
 (`vllm_omni_torchtpu:register_omni_tpu_platform`), which returns
 `vllm_omni_torchtpu.platform.OmniTpuPlatform` when TPU chips are present.
 Model code comes from vLLM-Omni; TPU fixes are applied as runtime patches.

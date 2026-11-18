@@ -14,9 +14,24 @@
 """TPU worker for autoregressive vLLM-Omni stages."""
 
 from vllm_omni.worker.mixins import OmniWorkerMixin
+from vllm_torchtpu.worker.tpu_worker import TPUWorker
 
 from vllm_omni_torchtpu.worker.base import OmniTPUWorkerBase
 from vllm_omni_torchtpu.worker.tpu_ar_model_runner import TPUARModelRunner
+
+
+def _require_core_model_runner_cls(worker_cls: type) -> None:
+    """Fail fast if vllm-torchtpu-core predates TPUWorker.model_runner_cls."""
+    if not hasattr(worker_cls, "model_runner_cls"):
+        raise ImportError(
+            "vllm-omni-torchtpu requires a vllm-torchtpu-core build that defines "
+            "TPUWorker.model_runner_cls (vllm-project/vllm-torchtpu#2065, newer "
+            "than 0.33.0). Install with `--group core-git` or upgrade "
+            "vllm-torchtpu-core."
+        )
+
+
+_require_core_model_runner_cls(TPUWorker)
 
 
 class TPUARWorker(OmniWorkerMixin, OmniTPUWorkerBase):

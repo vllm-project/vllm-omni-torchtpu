@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=61.0.0", "wheel", "setuptools_scm[toml]>=8.0"]
+requires = ["setuptools>=77.0.0", "setuptools_scm[toml]>=8.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -7,9 +7,9 @@ name = "vllm-omni-torchtpu"
 dynamic = ["version"]
 description = "vLLM-Omni platform plugin for Google Cloud TPU"
 readme = "README.md"
-# 3.12 only: every tpu-raiden-torch wheel is cp312-only, so any other interpreter
-# fails to resolve. Stating it here makes that an up-front error rather than an
-# unsatisfiable-requirements failure partway through a Docker build.
+# 3.12 only: torch_tpu, libtpu, and vllm-torchtpu wheels are cp312-only, so any
+# other interpreter fails to resolve. Stating it here makes that an up-front
+# error rather than an unsatisfiable-requirements failure during a build.
 requires-python = ">=3.12,<3.13"
 license = "Apache-2.0"
 authors = [
@@ -24,7 +24,10 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
 ]
 dependencies = [
-    "vllm-torchtpu-core>=0.33.0",
+    # Needs core hooks landed after the 0.33.0 release (vllm-torchtpu#2065 and
+    # #3304). Until a >=0.34.0 core wheel is on PyPI, install with `--group
+    # core-git` and `SETUPTOOLS_SCM_PRETEND_VERSION_FOR_VLLM_TORCHTPU_CORE=0.34.0.dev0`.
+    "vllm-torchtpu-core>=0.34.0.dev0",
     # vLLM-Omni dependency. vllm-omni keeps major.minor aligned with vLLM.
     "vllm-omni==0.32.0rc1",
     # vllm-omni pulls torchaudio through s3tokenizer. The PyPI torchaudio is a
@@ -40,16 +43,15 @@ dependencies = [
 # own `torchtpu` entry under `vllm_omni.platform_plugins` alongside `torchtpu`
 # under `vllm.platform_plugins`. Both vLLM and vllm-omni filter every plugin
 # group by entry-point name via `VLLM_PLUGINS`, and raise RuntimeError if two
-# out-of-tree platform plugins activate in the same group. Registering both our
-# omni platform and a `vllm.platform_plugins` alias under `torchtpu_omni` lets
-# `VLLM_PLUGINS=torchtpu_omni,torchtpu_layers,vllm_omni_register_models` select
-# this package's omni platform and core's TpuPlatform without activating core's
-# legacy `torchtpu` omni plugin.
+# out-of-tree platform plugins activate in the same group. `register_tpu_platform_alias`
+# returns None when `VLLM_PLUGINS` is unset (leaving plain vLLM working via core's
+# `torchtpu` entry) and delegates to `register_tpu_platform` when `VLLM_PLUGINS`
+# selects `torchtpu_omni`.
 [project.entry-points."vllm_omni.platform_plugins"]
 torchtpu_omni = "vllm_omni_torchtpu:register_omni_tpu_platform"
 
 [project.entry-points."vllm.platform_plugins"]
-torchtpu_omni = "vllm_torchtpu.platforms:register_tpu_platform"
+torchtpu_omni = "vllm_omni_torchtpu:register_tpu_platform_alias"
 
 # Dev / CI / Docker only. These are PEP 735 dependency groups, not extras:
 # groups are never written into the built wheel's metadata, so their git URLs
@@ -105,11 +107,11 @@ force-exclude = true
 [tool.ruff.lint]
 # E pycodestyle, F pyflakes, I import sorting, UP outdated syntax, B likely
 # bugs, SIM needless complexity, G logging calls, ISC string concatenation,
-# T20 print calls, S110 `except: pass`, TID251 banned imports.
+# T20 print calls, S110 `except: pass`.
 # E501 fails a line longer than 88 characters, the width `ruff format` wraps
 # code at. The formatter does not split comments or strings, so wrap those by
 # hand.
-select = ["E", "F", "I", "UP", "B", "SIM", "G", "ISC", "T20", "S110", "TID251"]
+select = ["E", "F", "I", "UP", "B", "SIM", "G", "ISC", "T20", "S110"]
 
 ignore = [
     # Off on purpose, matching upstream vllm.

@@ -31,6 +31,11 @@ os.environ.setdefault("TORCHINDUCTOR_AUTOGRAD_CACHE", "0")
 os.environ.setdefault("VLLM_WORKER_MULTIPROC_METHOD", "spawn")
 os.environ.setdefault("VLLM_NO_USAGE_STATS", "1")
 os.environ.setdefault("VLLM_DO_NOT_TRACK", "1")
+# Select this package's omni and vLLM plugins over vllm-torchtpu-core's torchtpu.
+os.environ.setdefault(
+    "VLLM_PLUGINS",
+    "torchtpu_omni,torchtpu_layers,vllm_omni_register_models",
+)
 
 import contextlib
 import copy

@@ -1,0 +1,31 @@
+/.venv
+/build
+/dist
+.eggs/
+*.egg-info/
+*.egg
+MANIFEST
+
+# Byte-compiled and optimized files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Git repository
+.git
+
+# Test and linter caches
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+
+# Non-runtime files excluded from container images
+docs/
+.github/
+.pre-commit-config.yaml
+.buildkite/
+!.buildkite/kubernetes/
+!.buildkite/scripts/
+!.buildkite/pipeline*.yml

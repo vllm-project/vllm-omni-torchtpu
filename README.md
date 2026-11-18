@@ -9,8 +9,8 @@ and preserved the commit history with `Upstream-commit` trailers.
 This package provides `OmniTpuPlatform`, TPU diffusion attention backends, RoPE
 helpers, multimodal autoregressive workers, and runtime model patches. Core TPU
 kernels and `TpuPlatform` remain in `vllm-torchtpu-core`. See the
-[plugin overview](src/vllm_omni_torchtpu/README.md) and the
-[roadmap](src/vllm_omni_torchtpu/ROADMAP.md) for scope details.
+[plugin overview](docs/omni_plugin.md), [installation guide](docs/installation.md),
+[testing guide](docs/testing.md), and [roadmap](docs/ROADMAP.md) for details.
 
 ## Installation (Python 3.12)
 

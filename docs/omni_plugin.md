@@ -18,7 +18,9 @@ Before you work on any new feature, bug fix or model in omni:
 1. Open a [GitHub issue](https://github.com/vllm-project/vllm-torchtpu/issues/new/choose)
    first. Start the title with `[Omni]`.
 2. Wait for an omni owner to confirm on the issue before you start work.
-   Owners are listed in [CODEOWNERS](../../../.github/CODEOWNERS) for
-   `/src/vllm_omni_torchtpu/`.
+   Owners are listed in
+   [CODEOWNERS](https://github.com/vllm-project/vllm-torchtpu/blob/main/.github/CODEOWNERS)
+   for `/src/vllm_omni_torchtpu/`.
 3. Link the issue in your PR and start the PR title with `[Omni]`.
-4. Follow the repository [CONTRIBUTING.md](../../../CONTRIBUTING.md).
+4. Follow the upstream
+   [CONTRIBUTING.md](https://github.com/vllm-project/vllm-torchtpu/blob/main/CONTRIBUTING.md).

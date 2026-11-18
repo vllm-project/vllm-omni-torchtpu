@@ -2,8 +2,8 @@
 
 This page describes how we plan to support vLLM-Omni on TPU over the next one
 to two quarters. These are plans, not commitments. To work on an item, open an
-issue first and follow [Contributing](README.md#contributing). See also the
-project [roadmap](../../../docs/roadmap.md).
+issue first and follow [Contributing](omni_plugin.md#contributing). See also the
+upstream project [roadmap](https://github.com/vllm-project/vllm-torchtpu/blob/main/docs/roadmap.md).
 
 Last updated: November 2026.
 
@@ -38,5 +38,5 @@ We plan to support future hardware.
 - The `omni` extra pins a vLLM-Omni release; we bump it as new releases ship.
 - At each pin bump we recheck the runtime patches in `patches/` and drop
   obsolete ones.
-- Omni tests live in [`tests_omni/`](../../../tests_omni/).
-- Omni owners in [CODEOWNERS](../../../.github/CODEOWNERS) triage omni issues.
+- Omni tests live in [`tests_omni/`](../tests_omni/).
+- Omni owners in [CODEOWNERS](https://github.com/vllm-project/vllm-torchtpu/blob/main/.github/CODEOWNERS) triage omni issues.

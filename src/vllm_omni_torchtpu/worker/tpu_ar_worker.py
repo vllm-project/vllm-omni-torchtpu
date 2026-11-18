@@ -15,8 +15,8 @@
 
 from vllm_omni.worker.mixins import OmniWorkerMixin
 
-from vllm_torchtpu.omni.worker.base import OmniTPUWorkerBase
-from vllm_torchtpu.omni.worker.tpu_ar_model_runner import TPUARModelRunner
+from vllm_omni_torchtpu.worker.base import OmniTPUWorkerBase
+from vllm_omni_torchtpu.worker.tpu_ar_model_runner import TPUARModelRunner
 
 
 class TPUARWorker(OmniWorkerMixin, OmniTPUWorkerBase):

@@ -21,7 +21,7 @@ from vllm.logger import init_logger
 from vllm_omni.platforms.interface import OmniPlatform, OmniPlatformEnum
 
 from vllm_torchtpu.env_override import set_libtpu_flag_default
-from vllm_torchtpu.omni.patches import apply_omni_tpu_patches
+from vllm_omni_torchtpu.patches import apply_omni_tpu_patches
 from vllm_torchtpu.platforms.tpu_platform import TpuPlatform
 
 logger = init_logger(__name__)
@@ -56,7 +56,7 @@ class OmniTpuPlatform(OmniPlatform, TpuPlatform):
         head_size: int,
         allow_trtllm_default: bool = False,
     ) -> str:
-        from vllm_torchtpu.omni.patches import apply_omni_model_specific_patches
+        from vllm_omni_torchtpu.patches import apply_omni_model_specific_patches
 
         apply_omni_model_specific_patches()
         if selected_backend is not None and selected_backend.upper() in (
@@ -64,9 +64,9 @@ class OmniTpuPlatform(OmniPlatform, TpuPlatform):
             "TPU_SDPA",
             "TORCH_SDPA",
         ):
-            backend = "vllm_torchtpu.omni.attention.TpuSDPABackend"
+            backend = "vllm_omni_torchtpu.attention.TpuSDPABackend"
         else:
-            backend = "vllm_torchtpu.omni.attention.TpuFlashAttentionBackend"
+            backend = "vllm_omni_torchtpu.attention.TpuFlashAttentionBackend"
         logger.info_once(
             "Using %s for diffusion attention (requested: %s).",
             backend,
@@ -84,7 +84,7 @@ class OmniTpuPlatform(OmniPlatform, TpuPlatform):
 
     @classmethod
     def get_profiler_cls(cls) -> str:
-        return "vllm_torchtpu.omni.profiler.TpuOmniTorchProfilerWrapper"
+        return "vllm_omni_torchtpu.profiler.TpuOmniTorchProfilerWrapper"
 
     @classmethod
     def supports_float64(cls) -> bool:
@@ -218,7 +218,7 @@ class OmniTpuPlatform(OmniPlatform, TpuPlatform):
 
     @classmethod
     def get_omni_ar_worker_cls(cls) -> str:
-        return "vllm_torchtpu.omni.worker.tpu_ar_worker.TPUARWorker"
+        return "vllm_omni_torchtpu.worker.tpu_ar_worker.TPUARWorker"
 
     @classmethod
     def get_omni_generation_worker_cls(cls) -> str:

@@ -23,8 +23,8 @@ from unittest.mock import MagicMock
 import pytest
 from vllm.config import ProfilerConfig
 
-from vllm_torchtpu.omni.platform import OmniTpuPlatform
-from vllm_torchtpu.omni.profiler import TpuOmniTorchProfilerWrapper
+from vllm_omni_torchtpu.platform import OmniTpuPlatform
+from vllm_omni_torchtpu.profiler import TpuOmniTorchProfilerWrapper
 
 pytestmark = pytest.mark.omni
 
@@ -55,7 +55,7 @@ def tpu_profiler(monkeypatch, tmp_path):
     mocks = SimpleNamespace(profile=MagicMock(), tpu_config=MagicMock())
     monkeypatch.setattr("torch.profiler.profile", mocks.profile)
     monkeypatch.setattr(
-        "vllm_torchtpu.omni.profiler.TpuProfilerConfig", mocks.tpu_config
+        "vllm_omni_torchtpu.profiler.TpuProfilerConfig", mocks.tpu_config
     )
     monkeypatch.setattr("torch.distributed.is_initialized", lambda: False)
 
@@ -90,7 +90,7 @@ def tpu_profiler(monkeypatch, tmp_path):
 def test_platform_returns_tpu_profiler_cls():
     assert (
         OmniTpuPlatform().get_profiler_cls()
-        == "vllm_torchtpu.omni.profiler.TpuOmniTorchProfilerWrapper"
+        == "vllm_omni_torchtpu.profiler.TpuOmniTorchProfilerWrapper"
     ), "the Omni TPU platform must hand Omni the TPU profiler wrapper"
 
 

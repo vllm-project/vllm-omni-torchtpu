@@ -23,10 +23,10 @@ from vllm_omni.worker.omni_connector_model_runner_mixin import (
     needs_omni_connector,
 )
 
-from vllm_torchtpu.omni.patches.qwen3omni_thinker import (
+from vllm_omni_torchtpu.patches.qwen3omni_thinker import (
     maybe_patch_qwen3_omni_thinker,
 )
-from vllm_torchtpu.omni.worker.tpu_model_runner import OmniTPUModelRunner
+from vllm_omni_torchtpu.worker.tpu_model_runner import OmniTPUModelRunner
 
 # Model capability flags that ``GPUARModelRunner`` reads (through
 # ``_model_omni_flag``) to drive the per-step preprocess / postprocess hooks.

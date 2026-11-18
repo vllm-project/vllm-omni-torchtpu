@@ -35,7 +35,7 @@ from vllm_omni.diffusion.models.flux.flux_transformer import FluxPosEmbed
 from vllm_omni.diffusion.models.flux2.flux2_transformer import Flux2PosEmbed
 
 from tests_omni.omni_test_utils import assert_parity
-from vllm_torchtpu.omni.attention import TpuFlashAttentionImpl, TpuSDPAImpl
+from vllm_omni_torchtpu.attention import TpuFlashAttentionImpl, TpuSDPAImpl
 
 pytestmark = [pytest.mark.omni]
 
@@ -333,7 +333,7 @@ class TestFluxTpuSDPAAttention:
         mock_warn = MagicMock()
         monkeypatch.setattr(TpuSDPAImpl, "forward", _spy_sdpa)
         monkeypatch.setattr(
-            "vllm_torchtpu.omni.attention.logger.warning_once", mock_warn
+            "vllm_omni_torchtpu.attention.logger.warning_once", mock_warn
         )
 
         masked_out = flash_impl.forward(

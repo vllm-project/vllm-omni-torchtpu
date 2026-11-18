@@ -172,7 +172,7 @@ def _patch_wan_pair_swap_rope() -> None:
     # -------------------------------------------------------------------------
     from vllm_omni.diffusion.layers.rope import RotaryEmbeddingWan
 
-    from vllm_torchtpu.omni.rope import rotary_embedding_wan_forward
+    from vllm_omni_torchtpu.rope import rotary_embedding_wan_forward
 
     RotaryEmbeddingWan.forward = rotary_embedding_wan_forward
     logger.info("Applied TPU patch: pair-swap matmul RotaryEmbeddingWan.")
@@ -316,7 +316,7 @@ def _patch_wan_fused_qk_norm_rope() -> None:
         WanSelfAttention,
     )
 
-    from vllm_torchtpu.omni.rope import (
+    from vllm_omni_torchtpu.rope import (
         can_fuse_qk_norm_rope,
         wan_self_attention_fused,
     )
@@ -426,7 +426,7 @@ def _patch_sdpa_fallback_dispatch() -> None:
     # -------------------------------------------------------------------------
     from vllm_omni.diffusion.attention.backends.sdpa import SDPAImpl
 
-    from vllm_torchtpu.omni.attention import TpuSDPAImpl
+    from vllm_omni_torchtpu.attention import TpuSDPAImpl
 
     if getattr(SDPAImpl.forward, _SDPA_FALLBACK_PATCHED, False):
         return
@@ -574,7 +574,7 @@ def _patch_ltx2_split_rope() -> None:
     # -------------------------------------------------------------------------
     from vllm_omni.diffusion.models.ltx2 import ltx2_transformer
 
-    from vllm_torchtpu.omni.rope import (
+    from vllm_omni_torchtpu.rope import (
         apply_split_rotary_half_swap,
         split_rope_natural_tables,
     )

@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Unit tests for src/vllm_torchtpu/omni/worker/tpu_ar_model_runner.py."""
+"""Unit tests for src/vllm_omni_torchtpu/worker/tpu_ar_model_runner.py."""
 
 from types import SimpleNamespace
 from typing import Any
@@ -22,7 +22,7 @@ from vllm.sequence import IntermediateTensors
 from vllm_omni.config import OmniModelConfig
 from vllm_omni.model_executor.models.output_templates import OmniOutput
 
-from vllm_torchtpu.omni.worker.tpu_ar_model_runner import TPUARModelRunner
+from vllm_omni_torchtpu.worker.tpu_ar_model_runner import TPUARModelRunner
 from vllm_torchtpu.runner.tpu_runner import TPUModelRunner
 
 pytestmark = pytest.mark.omni
@@ -54,7 +54,7 @@ def _stub_tpu_model_runner(monkeypatch: pytest.MonkeyPatch) -> None:
 
     monkeypatch.setattr(TPUModelRunner, "__init__", _fake_init)
     monkeypatch.setattr(
-        "vllm_torchtpu.omni.worker.tpu_ar_model_runner.maybe_patch_qwen3_omni_thinker",
+        "vllm_omni_torchtpu.worker.tpu_ar_model_runner.maybe_patch_qwen3_omni_thinker",
         lambda *_: False,
     )
 

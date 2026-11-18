@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Unit tests for src/vllm_torchtpu/omni/patches/qwen3omni_thinker.py."""
+"""Unit tests for src/vllm_omni_torchtpu/patches/qwen3omni_thinker.py."""
 
 from types import SimpleNamespace
 
@@ -21,7 +21,7 @@ from vllm_omni.model_executor.models.qwen3_omni.qwen3_omni_moe_thinker import (
     Qwen3OmniMoeAudioEncoder,
 )
 
-from vllm_torchtpu.omni.patches.qwen3omni_thinker import (
+from vllm_omni_torchtpu.patches.qwen3omni_thinker import (
     _AUDIO_CHUNK_LENGTHS_PATCHED,
     maybe_patch_qwen3_omni_thinker,
 )

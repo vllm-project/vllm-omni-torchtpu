@@ -20,7 +20,7 @@ def register_omni_tpu_platform() -> str | None:
     """Plugin entry point for vllm_omni.platform_plugins."""
     if get_num_chips() <= 0:
         return None
-    return "vllm_torchtpu.omni.platform.OmniTpuPlatform"
+    return "vllm_omni_torchtpu.platform.OmniTpuPlatform"
 
 
 __all__ = [

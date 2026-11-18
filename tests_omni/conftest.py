@@ -44,7 +44,7 @@ import psutil
 import pytest
 import torch
 
-from tests.tpu_release import wait_for_tpu_release
+from tests_omni.tpu_release import wait_for_tpu_release
 
 omni_fixture_lock = threading.Lock()
 
@@ -278,7 +278,7 @@ def _omni_model_patches(request: pytest.FixtureRequest) -> None:
     """
     if request.node.get_closest_marker("spawns_tpu_workers"):
         return
-    from vllm_torchtpu.omni.patches import apply_omni_model_specific_patches
+    from vllm_omni_torchtpu.patches import apply_omni_model_specific_patches
 
     apply_omni_model_specific_patches()
 

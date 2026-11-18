@@ -35,15 +35,15 @@ from vllm_omni.diffusion.models.wan2_2.wan2_2_transformer import (
 )
 from vllm_omni.diffusion.worker.diffusion_worker import WorkerProc
 
-from vllm_torchtpu.omni import patches, register_omni_tpu_platform
-from vllm_torchtpu.omni import rope as omni_rope
-from vllm_torchtpu.omni.attention import (
+from vllm_omni_torchtpu import patches, register_omni_tpu_platform
+from vllm_omni_torchtpu import rope as omni_rope
+from vllm_omni_torchtpu.attention import (
     TpuFlashAttentionBackend,
     TpuFlashAttentionImpl,
     TpuSDPABackend,
     TpuSDPAImpl,
 )
-from vllm_torchtpu.omni.patches import (
+from vllm_omni_torchtpu.patches import (
     _BWE_FILTER_CPU_RESTORE_PATCHED,
     _D2H_STREAM_PATCHED,
     _SDPA_FALLBACK_PATCHED,
@@ -57,8 +57,8 @@ from vllm_torchtpu.omni.patches import (
     apply_omni_model_specific_patches,
     apply_omni_tpu_patches,
 )
-from vllm_torchtpu.omni.platform import OmniTpuPlatform
-from vllm_torchtpu.omni.rope import (
+from vllm_omni_torchtpu.platform import OmniTpuPlatform
+from vllm_omni_torchtpu.rope import (
     _pair_swap_matrix,
     apply_rotary_pair_swap,
     can_fuse_qk_norm_rope,
@@ -81,11 +81,11 @@ _UPSTREAM_RESTORE_BWE_FILTER = ltx2_runtime._restore_ltx_bwe_resampler_filter
 
 
 def test_register_omni_tpu_platform(monkeypatch):
-    monkeypatch.setattr("vllm_torchtpu.omni.get_num_chips", lambda: 0)
+    monkeypatch.setattr("vllm_omni_torchtpu.get_num_chips", lambda: 0)
     assert register_omni_tpu_platform() is None
 
-    monkeypatch.setattr("vllm_torchtpu.omni.get_num_chips", lambda: 8)
-    assert register_omni_tpu_platform() == "vllm_torchtpu.omni.platform.OmniTpuPlatform"
+    monkeypatch.setattr("vllm_omni_torchtpu.get_num_chips", lambda: 8)
+    assert register_omni_tpu_platform() == "vllm_omni_torchtpu.platform.OmniTpuPlatform"
 
 
 def test_vllm_platform_accepts_omni_knobs():
@@ -109,12 +109,12 @@ def test_platform_attributes():
     assert platform.supports_diffusion_dense_flash_attention() is False
     assert (
         platform.get_diffusion_attn_backend_cls(None, 64)
-        == "vllm_torchtpu.omni.attention.TpuFlashAttentionBackend"
+        == "vllm_omni_torchtpu.attention.TpuFlashAttentionBackend"
     )
     for name in ("SDPA", "TPU_SDPA", "torch_sdpa"):
         assert (
             platform.get_diffusion_attn_backend_cls(name, 64)
-            == "vllm_torchtpu.omni.attention.TpuSDPABackend"
+            == "vllm_omni_torchtpu.attention.TpuSDPABackend"
         )
     with patch("torch.device") as mock_dev:
         platform.get_torch_device()
@@ -194,10 +194,10 @@ def test_tpu_flash_attention_backend(monkeypatch):
 
     mock_op = MagicMock(side_effect=lambda q, k, v, scale: q.clone())
     monkeypatch.setattr(
-        "vllm_torchtpu.omni.attention._flash_attention_op", lambda: mock_op
+        "vllm_omni_torchtpu.attention._flash_attention_op", lambda: mock_op
     )
     mock_warn = MagicMock()
-    monkeypatch.setattr("vllm_torchtpu.omni.attention.logger.warning_once", mock_warn)
+    monkeypatch.setattr("vllm_omni_torchtpu.attention.logger.warning_once", mock_warn)
 
     q = torch.randn(1, 16, 6, 16, dtype=torch.bfloat16)
     k = torch.randn(1, 16, 6, 16, dtype=torch.bfloat16)
@@ -350,7 +350,7 @@ def test_set_device_warns_on_pinned_multi_rank_stage(monkeypatch, chips, warns):
     )
     monkeypatch.setattr(torch, "accelerator", MagicMock(), raising=False)
     with (
-        patch("vllm_torchtpu.omni.platform.logger.warning") as mock_warning,
+        patch("vllm_omni_torchtpu.platform.logger.warning") as mock_warning,
         patch("torch.empty"),
         patch("torch.device"),
     ):
@@ -588,7 +588,7 @@ def test_sdpa_fallback_routes_to_tpu_sdpa(monkeypatch):
 
     # Installing again returns at the flag check, before the info log.
     infos = []
-    monkeypatch.setattr("vllm_torchtpu.omni.patches.logger.info", infos.append)
+    monkeypatch.setattr("vllm_omni_torchtpu.patches.logger.info", infos.append)
     _patch_sdpa_fallback_dispatch()
     assert infos == []
     assert SDPAImpl.forward is TpuSDPAImpl.forward

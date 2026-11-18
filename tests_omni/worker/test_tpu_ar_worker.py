@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Unit tests for src/vllm_torchtpu/omni/worker/base.py and tpu_ar_worker.py."""
+"""Unit tests for src/vllm_omni_torchtpu/worker/base.py and tpu_ar_worker.py."""
 
 import os
 from types import SimpleNamespace
@@ -24,10 +24,10 @@ from vllm.utils.import_utils import resolve_obj_by_qualname
 from vllm_omni.config import OmniModelConfig
 from vllm_omni.worker.mixins import OmniWorkerMixin
 
-from vllm_torchtpu.omni.platform import OmniTpuPlatform
-from vllm_torchtpu.omni.worker.base import OmniTPUWorkerBase
-from vllm_torchtpu.omni.worker.tpu_ar_model_runner import TPUARModelRunner
-from vllm_torchtpu.omni.worker.tpu_ar_worker import TPUARWorker
+from vllm_omni_torchtpu.platform import OmniTpuPlatform
+from vllm_omni_torchtpu.worker.base import OmniTPUWorkerBase
+from vllm_omni_torchtpu.worker.tpu_ar_model_runner import TPUARModelRunner
+from vllm_omni_torchtpu.worker.tpu_ar_worker import TPUARWorker
 from vllm_torchtpu.runner.tpu_runner import TPUModelRunner
 from vllm_torchtpu.worker.tpu_worker import TPUWorker
 

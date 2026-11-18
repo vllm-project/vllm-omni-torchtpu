@@ -33,8 +33,8 @@ from vllm_omni.diffusion.models.qwen_image.qwen_image_transformer import (
 )
 
 from tests_omni.omni_test_utils import assert_parity
-from vllm_torchtpu.omni.attention import TpuSDPAImpl
-from vllm_torchtpu.omni.patches import apply_omni_model_specific_patches
+from vllm_omni_torchtpu.attention import TpuSDPAImpl
+from vllm_omni_torchtpu.patches import apply_omni_model_specific_patches
 
 pytestmark = [pytest.mark.omni]
 

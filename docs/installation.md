@@ -9,7 +9,7 @@ pin are base dependencies.
 | Upstream `vllm-torchtpu` option | `vllm-omni-torchtpu` equivalent |
 | :--- | :--- |
 | `--extra omni` (installs `vllm-omni` and CPU `torchaudio`) | `uv pip install -e .` (both packages are base dependencies of `vllm-omni-torchtpu`). |
-| In-tree `vllm-torchtpu-core` checkout | `--group core-git` (installs `vllm-torchtpu-core` at `b4c66abc296bf91770346fe2d9ad88d106a4f9b6` for `#2065` and `#3304`). |
+| In-tree `vllm-torchtpu-core` checkout | `--group core-git` (installs `vllm-torchtpu-core` at `a0275aad4f81a8befa40f8dc7a3fbeebaaff4355` for `#2065` and `#3304`). |
 | `--group vllm` (builds `vllm` `v0.33.0` from source) | `--group vllm` with `VLLM_TARGET_DEVICE=empty` (or install the prebuilt `vllm-torchtpu==0.33.0` wheel). |
 
 ## Python 3.12 Virtual Environment

@@ -22,8 +22,8 @@ repository with `core-git` and `test`:
 ```bash
 uv venv --python 3.12 ~/venvs/vllm-omni-torchtpu
 source ~/venvs/vllm-omni-torchtpu/bin/activate
-git clone https://github.com/mbohlool/vllm-omni-torchtpu-private.git
-cd vllm-omni-torchtpu-private
+git clone https://github.com/vllm-project/vllm-omni-torchtpu.git
+cd vllm-omni-torchtpu
 
 uv pip install --torch-backend cpu "vllm-torchtpu==0.33.0"
 SETUPTOOLS_SCM_PRETEND_VERSION_FOR_VLLM_TORCHTPU_CORE=0.34.0.dev0 \

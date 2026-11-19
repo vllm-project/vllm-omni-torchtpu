@@ -32,7 +32,7 @@ WORKDIR /workspace/vllm-omni-torchtpu
 # `dev` image installs core editable from `/workspace/vllm-torchtpu` and puts
 # `/workspace/vllm-torchtpu/src` on PYTHONPATH, so remove that tree first to
 # prevent an older checkout from shadowing the reinstalled package.
-ARG CORE_COMMIT=b4c66abc296bf91770346fe2d9ad88d106a4f9b6
+ARG CORE_COMMIT=a0275aad4f81a8befa40f8dc7a3fbeebaaff4355
 RUN rm -rf /workspace/vllm-torchtpu && \
     SETUPTOOLS_SCM_PRETEND_VERSION_FOR_VLLM_TORCHTPU_CORE=0.34.0.dev0 \
     uv pip install --system --no-cache --no-deps --reinstall-package vllm-torchtpu-core \

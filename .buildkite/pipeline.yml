@@ -14,8 +14,7 @@
 
 # Self-contained Buildkite TPU pipeline for vllm-omni-torchtpu, ported from
 # vllm-project/vllm-torchtpu (.buildkite/pipeline_build.yml and
-# .buildkite/pipeline_tests.yml). Inert until a Buildkite pipeline with
-# cpu_64_core and Kueue TPU (`kube`) agents is attached to this repository;
+# .buildkite/pipeline_tests.yml) and uploaded by .buildkite/scripts/bootstrap.sh;
 # see .buildkite/README.md.
 
 x-image-build-retry: &image_build_retry
@@ -34,7 +33,7 @@ x-tpu-step-defaults: &tpu_step
     queue: "kube"
 
 x-tests-plugin-defaults: &tests_plugin_defaults
-  suite-slug: tpu-ci
+  suite-slug: "${TEST_ENGINE_SUITE_SLUG:-tpu-ci}"
   test-runner: pytest
   test-file-pattern: "tests_omni/**/{test_*,*_test}.py"
   install-client: false

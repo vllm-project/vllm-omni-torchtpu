@@ -430,7 +430,7 @@ def test_tpu_sdpa_masked_calls_use_math_backend(monkeypatch, mask_kind, expect_m
     # sdpa_kernel(MATH), while unmasked calls and full-query-dim masks (3D or
     # 4D) must not. b11k_additive is a float mask in the query dtype, for which
     # vLLM-Omni's SDPAImpl does not select MATH itself.
-    from vllm_torchtpu.omni import attention as omni_attention
+    from vllm_omni_torchtpu import attention as omni_attention
 
     backends = []
     real_sdpa_kernel = omni_attention.sdpa_kernel

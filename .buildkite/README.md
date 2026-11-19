@@ -30,3 +30,18 @@ pipeline from `vllm-project/vllm-torchtpu` (`.buildkite/pipeline_build.yml` and
 - `kubernetes/run.sh` and `kubernetes/common.sh`: Submit single-pod TPU jobs
   through `/opt/launcher/launch` on the Kueue `kube` queue and forward
   `VLLM_PLUGINS` and Buildkite Test Engine (`bktec`) settings.
+
+## Adapting This Pipeline to a New Organization
+
+The default values preserve parity with `vllm-project/vllm-torchtpu`. Update
+these four settings before attaching a Buildkite pipeline to another repository:
+
+- **`IMAGE_REPO`** (`scripts/setup_docker_env.sh`): Point to an Artifact Registry
+  or container repository where your builder queue has push access.
+- **Agent queues** (`pipeline.yml`): Replace `cpu_64_core` and `kube` (plus
+  `KUBE_SHAPE_SINGLE` and `KUBE_SHAPE_MULTI` if needed) with your Buildkite
+  builder and TPU runner queues.
+- **`suite-slug`** (`pipeline.yml`): Update `tpu-ci` to match your Buildkite
+  Test Engine suite slug (or replace `bktec run` with a direct `pytest` call).
+- **Golden reference bucket** (`pipeline.yml`): Replace
+  `gs://tpu-commons-ci/golden/` with a GCS bucket that your TPU pods can read.

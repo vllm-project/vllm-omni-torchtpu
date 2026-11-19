@@ -13,12 +13,12 @@
 # limitations under the License.
 
 # Omni image for vllm-omni-torchtpu, layered on the upstream vllm-torchtpu
-# developer image (`vllm/vllm-torchtpu:nightly` on Docker Hub, built from the
-# `dev` stage of vllm-project/vllm-torchtpu).
+# developer image (`vllm/vllm-torchtpu:nightly` on Docker Hub, pinned by digest
+# alongside `CORE_COMMIT` so CI builds stay reproducible).
 #
 # Build from the repository root:
 #   DOCKER_BUILDKIT=1 docker build -f docker/Dockerfile -t vllm-omni-torchtpu:dev .
-ARG BASE_IMAGE=vllm/vllm-torchtpu:nightly
+ARG BASE_IMAGE=vllm/vllm-torchtpu:nightly@sha256:43d090dac793f9dfa2fcf4339c915fed0d10438d618068436fc37a959df56ff9
 FROM ${BASE_IMAGE} AS omni
 
 # vllm-omni depends on opencv-python (not -headless), whose cv2 links libGL and
@@ -33,10 +33,9 @@ WORKDIR /workspace/vllm-omni-torchtpu
 # `/workspace/vllm-torchtpu/src` on PYTHONPATH, so remove that tree first to
 # prevent an older checkout from shadowing the reinstalled package.
 ARG CORE_COMMIT=b4c66abc296bf91770346fe2d9ad88d106a4f9b6
-RUN --mount=type=cache,target=/root/.cache/uv \
-    rm -rf /workspace/vllm-torchtpu && \
-    SETUPTOOLS_SCM_PRETEND_VERSION_FOR_VLLM_TORCHTPU_CORE=0.33.0 \
-    uv pip install --system --no-deps --reinstall-package vllm-torchtpu-core \
+RUN rm -rf /workspace/vllm-torchtpu && \
+    SETUPTOOLS_SCM_PRETEND_VERSION_FOR_VLLM_TORCHTPU_CORE=0.34.0.dev0 \
+    uv pip install --system --no-cache --no-deps --reinstall-package vllm-torchtpu-core \
       "vllm-torchtpu-core @ git+https://github.com/vllm-project/vllm-torchtpu.git@${CORE_COMMIT}"
 
 # Pre-install omni and test dependencies before copying the full tree so edits

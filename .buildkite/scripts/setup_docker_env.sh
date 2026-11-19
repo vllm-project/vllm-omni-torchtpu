@@ -67,17 +67,17 @@ if [[ "${CI_IMAGE_REBUILD:-0}" != "1" ]] \
   exit 0
 fi
 
+BASE_IMAGE="${BASE_IMAGE:-vllm/vllm-torchtpu:nightly@sha256:43d090dac793f9dfa2fcf4339c915fed0d10438d618068436fc37a959df56ff9}"
+
 echo "--- Building Docker Image: ${BASE_IMAGE_TAG} (target: ${TARGET})"
 DOCKER_ARGS=(
   --progress=plain
   -f "${REPO_ROOT}/docker/Dockerfile"
   --target "${TARGET}"
   -t "${BASE_IMAGE_TAG}"
+  --build-arg "BASE_IMAGE=${BASE_IMAGE}"
   --build-arg "VLLM_COMMIT_HASH=${VLLM_COMMIT_HASH}"
 )
-if [ -n "${BASE_IMAGE:-}" ]; then
-  DOCKER_ARGS+=(--build-arg "BASE_IMAGE=${BASE_IMAGE}")
-fi
 if [ -n "${CORE_COMMIT:-}" ]; then
   DOCKER_ARGS+=(--build-arg "CORE_COMMIT=${CORE_COMMIT}")
 fi

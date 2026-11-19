@@ -58,12 +58,12 @@ torchtpu_omni = "vllm_omni_torchtpu:register_tpu_platform_alias"
 # do not block a PyPI upload (PyPI rejects direct-URL requirements, even in
 # extras). Install with `--group <name>` (uv, or pip >= 25.1).
 [dependency-groups]
-# The omni code cut at b4c66abc296bf91770346fe2d9ad88d106a4f9b6 needs
+# The omni code cut at a0275aad4f81a8befa40f8dc7a3fbeebaaff4355 needs
 # vllm-torchtpu-core changes newer than the 0.33.0 release (vllm-torchtpu#2065
 # and #3304, including TPUWorker.model_runner_cls and the guarded worker_cls
 # default in TpuPlatform).
 core-git = [
-    "vllm-torchtpu-core @ git+https://github.com/vllm-project/vllm-torchtpu.git@b4c66abc296bf91770346fe2d9ad88d106a4f9b6",
+    "vllm-torchtpu-core @ git+https://github.com/vllm-project/vllm-torchtpu.git@a0275aad4f81a8befa40f8dc7a3fbeebaaff4355",
 ]
 
 # vLLM built from source. Deliberately NOT in `dependencies`: the combined

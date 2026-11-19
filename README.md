@@ -1,5 +1,7 @@
 # vllm-omni-torchtpu
 
+**This repository is in migration from [vllm-project/vllm-torchtpu](https://github.com/vllm-project/vllm-torchtpu). During the migration, please continue to use [vllm-torchtpu](https://github.com/vllm-project/vllm-torchtpu).**
+
 `vllm-omni-torchtpu` (`vllm_omni_torchtpu`) is the Google Cloud TPU platform
 plugin for [vLLM-Omni](https://github.com/vllm-project/vllm-omni). Maintainers
 extracted this repository from

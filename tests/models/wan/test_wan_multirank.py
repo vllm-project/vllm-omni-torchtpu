@@ -20,8 +20,8 @@ pytest.importorskip("vllm_omni", reason="vllm_omni is required for Wan tests")
 
 from vllm_omni.diffusion.data import DiffusionParallelConfig
 
-from tests_omni.conftest import OmniRunner
-from tests_omni.models.wan.utils import (
+from tests.conftest import OmniRunner
+from tests.models.wan.utils import (
     WAN2_1_T2V_1_3B,
     WAN2_1_T2V_14B,
     WanTestConfig,

@@ -25,7 +25,7 @@ from vllm_omni.diffusion.models.ltx2.ltx2_recipes import LTX_DEFAULT_NEGATIVE_PR
 from vllm_omni.inputs.data import OmniDiffusionSamplingParams
 from vllm_omni.outputs import OmniRequestOutput
 
-from tests_omni.omni_test_utils import compare_video_to_golden
+from tests.omni_test_utils import compare_video_to_golden
 
 LTX2_MODEL_ID = "Lightricks/LTX-2"
 LTX2_PROMPT = (

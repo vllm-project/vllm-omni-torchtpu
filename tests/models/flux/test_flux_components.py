@@ -35,7 +35,7 @@ from vllm_omni.diffusion.layers.rope import RotaryEmbedding, apply_rope_to_qk
 from vllm_omni.diffusion.models.flux.flux_transformer import FluxPosEmbed
 from vllm_omni.diffusion.models.flux2.flux2_transformer import Flux2PosEmbed
 
-from tests_omni.omni_test_utils import assert_parity
+from tests.omni_test_utils import assert_parity
 from vllm_omni_torchtpu.attention import TpuFlashAttentionImpl, TpuSDPAImpl
 
 pytestmark = [pytest.mark.omni]

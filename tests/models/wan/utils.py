@@ -24,7 +24,7 @@ from PIL import Image
 from vllm_omni.inputs.data import OmniDiffusionSamplingParams
 from vllm_omni.outputs import OmniRequestOutput
 
-from tests_omni.omni_test_utils import compare_video_to_golden
+from tests.omni_test_utils import compare_video_to_golden
 
 
 @dataclass(frozen=True)

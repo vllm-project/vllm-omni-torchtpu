@@ -20,7 +20,7 @@ pytest.importorskip("vllm_omni", reason="vllm_omni is required for omni model te
 
 from vllm import SamplingParams
 
-from tests_omni.conftest import OmniRunner
+from tests.conftest import OmniRunner
 
 # qwen3_omni_moe_thinking.yaml runs with tensor_parallel_size=2 via
 # TpuMultiprocExecutor, so keep it in the multichip nightly lane rather than

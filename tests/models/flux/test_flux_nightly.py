@@ -24,7 +24,7 @@ import pytest
 from PIL import Image
 from vllm_omni.inputs.data import OmniDiffusionSamplingParams
 
-from tests_omni.conftest import OmniRunner
+from tests.conftest import OmniRunner
 
 pytestmark = [
     pytest.mark.nightly,

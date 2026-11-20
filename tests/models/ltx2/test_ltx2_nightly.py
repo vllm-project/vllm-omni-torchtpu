@@ -39,8 +39,8 @@ import pytest
 
 pytest.importorskip("vllm_omni", reason="vllm_omni is required for LTX-2 tests")
 
-from tests_omni.conftest import OmniRunner
-from tests_omni.models.ltx2.utils import (
+from tests.conftest import OmniRunner
+from tests.models.ltx2.utils import (
     LTX2_GOLDEN_EXTRA_ARGS,
     LTX2_GOLDEN_STEPS,
     LTX2_PROMPT,
@@ -128,7 +128,7 @@ def test_ltx2_seed_determinism_tpu(omni_runner: OmniRunner) -> None:
 
 
 # NOTE: How the golden was generated (outside pytest, on 4 chips).
-# 1. Omni model launch, with the tests_omni/conftest.py env defaults:
+# 1. Omni model launch, with the tests/conftest.py env defaults:
 #        omni = Omni(model=get_ltx2_model(), dtype=LTX2_GOLDEN_DTYPE,
 #                    tensor_parallel_size=LTX2_GOLDEN_TENSOR_PARALLEL_SIZE)
 # 2. Request, the same as this test's:

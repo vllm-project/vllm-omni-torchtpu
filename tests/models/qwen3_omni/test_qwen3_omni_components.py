@@ -31,7 +31,7 @@ from vllm_omni.model_executor.models.qwen3_omni.qwen3_omni_moe_thinker import (
     _get_feat_extract_output_lengths,
 )
 
-from tests_omni.omni_test_utils import assert_all_loaded, assert_parity
+from tests.omni_test_utils import assert_all_loaded, assert_parity
 from vllm_omni_torchtpu.patches.qwen3omni_thinker import (
     _AUDIO_CHUNK_LENGTHS_PATCHED,
     maybe_patch_qwen3_omni_thinker,

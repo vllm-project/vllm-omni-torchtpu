@@ -13,7 +13,7 @@
 # limitations under the License.
 """Shared pytest configuration for the Omni tests.
 
-tests_omni/ holds tests that need the real vllm-omni package, which only the
+tests/ holds tests that need the real vllm-omni package, which only the
 ``-omni`` CI image installs. It sits outside tests/ so the general CI lanes,
 which glob ``tests/**`` in the dev image, never collect it; only the Omni lanes
 in .buildkite/pipeline_tests.yml run it.
@@ -44,7 +44,7 @@ import psutil
 import pytest
 import torch
 
-from tests_omni.tpu_release import wait_for_tpu_release
+from tests.tpu_release import wait_for_tpu_release
 
 omni_fixture_lock = threading.Lock()
 

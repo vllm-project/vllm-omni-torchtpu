@@ -32,7 +32,7 @@ from vllm_omni.diffusion.models.qwen_image.qwen_image_transformer import (
     QwenEmbedRope,
 )
 
-from tests_omni.omni_test_utils import assert_parity
+from tests.omni_test_utils import assert_parity
 from vllm_omni_torchtpu.attention import TpuSDPAImpl
 from vllm_omni_torchtpu.patches import apply_omni_model_specific_patches
 

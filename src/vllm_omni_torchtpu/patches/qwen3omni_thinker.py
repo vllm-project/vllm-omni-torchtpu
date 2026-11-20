@@ -51,7 +51,7 @@ window count on the host with integer arithmetic, ``forward`` takes
 ``aftercnn_lens=None`` and feeds ``_get_cnn_output_lengths`` a NumPy array, so
 this patch is both unnecessary and incompatible there. The strict ``xfail``
 test ``test_upstream_forward_miscounts_exact_window_multiples`` in
-``tests_omni/models/qwen3_omni/test_qwen3_omni_components.py`` reproduces the
+``tests/models/qwen3_omni/test_qwen3_omni_components.py`` reproduces the
 failure the patch works around and turns into an XPASS failure once it is gone
 upstream or once TPU float division becomes exact for these lengths.
 """

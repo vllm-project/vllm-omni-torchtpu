@@ -53,7 +53,10 @@ This pipeline shares infrastructure and scheduling rules with
 - **PR labels**: `oncall-fix` selects the `oncall-fix` priority class,
   `skip-tpu-ci` strips all TPU steps and sets `OMNI_IMAGE_SKIP` to skip
   `build_docker_omni`, and `run-full-ci` substitutes `NIGHTLY=1`
-  (`skip-tpu-ci` and `run-full-ci` are mutually exclusive).
+  (`skip-tpu-ci` and `run-full-ci` are mutually exclusive). `bootstrap.py`
+  requires a `buildkite-agent` that supports
+  `pipeline upload --dry-run --format json` for `skip-tpu-ci` and aborts the
+  build if `--dry-run` fails.
 - **Artifact Registry and GCS**: `setup_docker_env.sh` pushes to
   `us-central1-docker.pkg.dev/cloud-ullm-inference-ci-cd/vllm-torchtpu-ci/vllm-omni-torchtpu`
   (`IMAGE_REPO`), and TPU pods stage golden files from

@@ -32,7 +32,6 @@ from vllm_omni.model_extras import build_image_to_image_prompt, get_model_class_
 from tests.omni_test_utils import compute_ssim, high_freq_energy
 
 pytestmark = [
-    pytest.mark.omni,
     pytest.mark.spawns_tpu_workers,
 ]
 

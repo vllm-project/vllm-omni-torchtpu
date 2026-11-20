@@ -26,8 +26,6 @@ from vllm.config import ProfilerConfig
 from vllm_omni_torchtpu.platform import OmniTpuPlatform
 from vllm_omni_torchtpu.profiler import TpuOmniTorchProfilerWrapper
 
-pytestmark = pytest.mark.omni
-
 _PROFILER_TS = "2026_01_01_12_00_00"
 
 

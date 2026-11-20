@@ -81,9 +81,6 @@ from tests.omni_test_utils import assert_all_loaded, assert_parity
 from vllm_omni_torchtpu.patches import apply_omni_model_specific_patches
 from vllm_omni_torchtpu.rope import can_fuse_qk_norm_rope
 
-pytestmark = [pytest.mark.omni]
-
-
 # (TPU fp32, TPU bf16) rel_l2 and max_abs limits vs the CPU fp32 reference,
 # ~3% above the observed values. Both sides are deterministic across hosts; a
 # CPU bf16 reference is not, so it is not used.

@@ -25,8 +25,6 @@ from vllm_torchtpu.runner.tpu_runner import TPUModelRunner
 
 from vllm_omni_torchtpu.worker.tpu_ar_model_runner import TPUARModelRunner
 
-pytestmark = pytest.mark.omni
-
 
 def _stage_config(**fields: Any) -> OmniModelConfig:
     defaults = dict(

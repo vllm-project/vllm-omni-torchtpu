@@ -31,8 +31,6 @@ from vllm_omni_torchtpu.worker.base import OmniTPUWorkerBase
 from vllm_omni_torchtpu.worker.tpu_ar_model_runner import TPUARModelRunner
 from vllm_omni_torchtpu.worker.tpu_ar_worker import TPUARWorker
 
-pytestmark = pytest.mark.omni
-
 
 def test_tpu_ar_worker_wiring():
     assert resolve_obj_by_qualname(OmniTpuPlatform.get_omni_ar_worker_cls()) is (

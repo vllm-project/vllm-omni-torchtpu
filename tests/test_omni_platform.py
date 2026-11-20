@@ -68,8 +68,6 @@ from vllm_omni_torchtpu.rope import (
     wan_self_attention_fused,
 )
 
-pytestmark = pytest.mark.omni
-
 # The patches rebind these upstream functions in place, and the first
 # apply_omni_model_specific_patches() call in the session installs them for
 # good. Tests that reinstall a patch start from the functions captured here,

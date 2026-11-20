@@ -39,6 +39,6 @@ We plan to support future hardware.
   maintainers bump it as new releases ship.
 - At each pin bump we recheck the runtime patches in `patches/` and drop
   obsolete ones.
-- Omni tests live in [`tests_omni/`](../tests_omni/).
+- Omni tests live in [`tests/`](../tests/).
 - Repository maintainers triage omni issues in this repository while standalone
   `CODEOWNERS` governance is finalized.

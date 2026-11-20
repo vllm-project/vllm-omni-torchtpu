@@ -9,7 +9,7 @@ pin are base dependencies.
 | Upstream `vllm-torchtpu` option | `vllm-omni-torchtpu` equivalent |
 | :--- | :--- |
 | `--extra omni` (installs `vllm-omni` and CPU `torchaudio`) | `uv pip install -e .` (both packages are base dependencies of `vllm-omni-torchtpu`). |
-| In-tree `vllm-torchtpu-core` checkout | `--group core-git` (installs `vllm-torchtpu-core` at `a0275aad4f81a8befa40f8dc7a3fbeebaaff4355` for `#2065` and `#3304`). |
+| In-tree `vllm-torchtpu-core` checkout | `--group core-git` (installs `vllm-torchtpu-core` at `a0275aad4f81a8befa40f8dc7a3fbeebaaff4355` for `#2065` and `#3304`, newer than `0.33.0`). |
 | `--group vllm` (builds `vllm` `v0.33.0` from source) | `--group vllm` with `VLLM_TARGET_DEVICE=empty` (or install the prebuilt `vllm-torchtpu==0.33.0` wheel). |
 
 ## Python 3.12 Virtual Environment
@@ -17,7 +17,7 @@ pin are base dependencies.
 `vllm-omni-torchtpu` requires Python 3.12 (`>=3.12,<3.13`) because TPU runtime
 wheels target `cp312` only. Create a virtual environment with `uv` (`>= 0.6`),
 install the prebuilt `vllm-torchtpu==0.33.0` wheel, and then install this
-repository with `core-git` and `test`:
+repository with the `test` group:
 
 ```bash
 uv venv --python 3.12 ~/venvs/vllm-omni-torchtpu
@@ -26,20 +26,33 @@ git clone https://github.com/vllm-project/vllm-omni-torchtpu.git
 cd vllm-omni-torchtpu
 
 uv pip install --torch-backend cpu "vllm-torchtpu==0.33.0"
-SETUPTOOLS_SCM_PRETEND_VERSION_FOR_VLLM_TORCHTPU_CORE=0.34.0.dev0 \
-  uv pip install --torch-backend cpu \
-  -e . --group core-git --group test
+uv pip install --torch-backend cpu -e . --group test
 
 export VLLM_PLUGINS=torchtpu_omni,torchtpu_layers,vllm_omni_register_models
 ```
 
-`vllm-torchtpu==0.33.0` pins `vllm-torchtpu-core==0.33.0`, so install it in a
-separate step before `-e .` (`vllm-torchtpu-core>=0.34.0.dev0`).
-`vllm-project/vllm-torchtpu` keeps release tags off `main`, so setting
-`SETUPTOOLS_SCM_PRETEND_VERSION_FOR_VLLM_TORCHTPU_CORE=0.34.0.dev0` stamps a
-version that satisfies `vllm-torchtpu-core>=0.34.0.dev0`. If `uv` already cached
-an earlier git build of `vllm-torchtpu-core`, run
-`uv cache clean vllm-torchtpu-core` first.
+The base dependency floor is the released `vllm-torchtpu-core>=0.33.0`, so this
+resolves from PyPI without any version override.
+
+## Newer `vllm-torchtpu-core` from Git (`core-git`)
+
+This extract was cut against `vllm-torchtpu-core` changes newer than `0.33.0`
+(`#2065` and `#3304`). `TPUARWorker`, the autoregressive worker for Qwen3-Omni
+stages, needs `TPUWorker.model_runner_cls` from `#2065` and raises an
+`ImportError` that points to `--group core-git` when core lacks it. Until
+`vllm-torchtpu-core>=0.34.0` is on PyPI, CI and TPU runs overlay `core-git`:
+
+```bash
+SETUPTOOLS_SCM_PRETEND_VERSION_FOR_VLLM_TORCHTPU_CORE=0.34.0.dev0 \
+  uv pip install --torch-backend cpu \
+  -e . --group core-git --group test
+```
+
+`vllm-project/vllm-torchtpu` keeps release tags off `main`, so `uv` builds the
+pinned commit with a setuptools-scm version below `0.33.0` that fails the
+floor. `SETUPTOOLS_SCM_PRETEND_VERSION_FOR_VLLM_TORCHTPU_CORE=0.34.0.dev0` is
+needed only with `--group core-git`. If `uv` already cached an earlier git build
+of `vllm-torchtpu-core`, run `uv cache clean vllm-torchtpu-core` first.
 
 If you prefer to build `vllm` `v0.33.0` from source in one step instead of using
 the prebuilt `vllm-torchtpu==0.33.0` wheel, pass `VLLM_TARGET_DEVICE=empty` and

@@ -33,7 +33,6 @@ from .conftest import (
     cleanup_test_environment as _real_cleanup_test_environment,
 )
 
-pytestmark = pytest.mark.omni
 _EVENTS: list[tuple[str, str]] = []
 
 

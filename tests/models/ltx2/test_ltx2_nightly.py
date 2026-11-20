@@ -51,7 +51,6 @@ from tests.models.ltx2.utils import (
 )
 
 pytestmark = [
-    pytest.mark.omni,
     pytest.mark.nightly,
     pytest.mark.spawns_tpu_workers,
 ]

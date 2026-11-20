@@ -26,8 +26,6 @@ from vllm_omni_torchtpu.patches.qwen3omni_thinker import (
     maybe_patch_qwen3_omni_thinker,
 )
 
-pytestmark = pytest.mark.omni
-
 THINKER_ARCHS = ["Qwen3OmniMoeForConditionalGeneration"]
 
 

@@ -31,7 +31,6 @@ from tests.models.wan.utils import (
 )
 
 pytestmark = [
-    pytest.mark.omni,
     pytest.mark.spawns_tpu_workers,
 ]
 

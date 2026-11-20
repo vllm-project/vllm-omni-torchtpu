@@ -28,7 +28,6 @@ from tests.conftest import OmniRunner
 
 pytestmark = [
     pytest.mark.nightly,
-    pytest.mark.omni,
     pytest.mark.spawns_tpu_workers,
 ]
 

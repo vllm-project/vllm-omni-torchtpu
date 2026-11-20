@@ -33,7 +33,6 @@ from tests.omni_test_utils import high_freq_energy
 
 pytestmark = [
     pytest.mark.nightly,
-    pytest.mark.omni,
     pytest.mark.spawns_tpu_workers,
 ]
 

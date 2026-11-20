@@ -37,8 +37,6 @@ from vllm_omni_torchtpu.patches.qwen3omni_thinker import (
     maybe_patch_qwen3_omni_thinker,
 )
 
-pytestmark = [pytest.mark.omni]
-
 # Production chunking geometry (num_mel_bins 128, n_window 50 -> 100-frame
 # windows, n_window_infer 800, three stride-2 convolutions) on a tiny encoder.
 AUDIO_CONFIG = Qwen3OmniMoeAudioEncoderConfig(

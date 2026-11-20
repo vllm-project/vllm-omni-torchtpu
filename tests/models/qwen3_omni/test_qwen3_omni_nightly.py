@@ -26,7 +26,6 @@ from tests.conftest import OmniRunner
 # TpuMultiprocExecutor, so keep it in the multichip nightly lane rather than
 # sharing a pytest process with single-device in-process DiffusionEngine tests.
 pytestmark = [
-    pytest.mark.omni,
     pytest.mark.nightly,
     pytest.mark.spawns_tpu_workers,
     pytest.mark.multichip,

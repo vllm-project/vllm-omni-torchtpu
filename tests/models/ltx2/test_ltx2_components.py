@@ -84,8 +84,6 @@ from vllm_omni.platforms import current_omni_platform
 from tests.omni_test_utils import assert_all_loaded, assert_parity
 from vllm_omni_torchtpu.rope import split_rope_natural_tables
 
-pytestmark = [pytest.mark.omni]
-
 # TPU-built RoPE coords vs diffusers CPU: TPU fp32 division is a reciprocal
 # multiply, so timestamps divided by fps or sampling_rate land up to 1 ULP off.
 ROPE_COORDS_MAX_ABS = 1.3e-7

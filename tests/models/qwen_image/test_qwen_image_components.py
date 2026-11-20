@@ -36,8 +36,6 @@ from tests.omni_test_utils import assert_parity
 from vllm_omni_torchtpu.attention import TpuSDPAImpl
 from vllm_omni_torchtpu.patches import apply_omni_model_specific_patches
 
-pytestmark = [pytest.mark.omni]
-
 # assert_parity's numeric-mismatch messages. Must-fail controls match on them so
 # that other AssertionErrors, such as a shape mismatch, do not satisfy them.
 NUMERIC_MISMATCH_PATTERN = r"relative L2 error|max absolute error"

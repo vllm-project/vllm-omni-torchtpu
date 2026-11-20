@@ -4,26 +4,21 @@ Maintainers adapted this guide from the omni installation sections of
 [`vllm-project/vllm-torchtpu`](https://github.com/vllm-project/vllm-torchtpu).
 In `vllm-torchtpu`, users enabled omni support with `--extra omni`. In
 `vllm-omni-torchtpu`, `vllm-omni==0.32.0rc1` and the CPU `torchaudio==2.11.0`
-pin are base dependencies.
-
-| Upstream `vllm-torchtpu` option | `vllm-omni-torchtpu` equivalent |
-| :--- | :--- |
-| `--extra omni` (installs `vllm-omni` and CPU `torchaudio`) | `uv pip install -e .` (both packages are base dependencies of `vllm-omni-torchtpu`). |
-| In-tree `vllm-torchtpu-core` checkout | `--group core-git` (installs `vllm-torchtpu-core` at `a0275aad4f81a8befa40f8dc7a3fbeebaaff4355` for `#2065` and `#3304`, newer than `0.33.0`). |
-| `--group vllm` (builds `vllm` `v0.33.0` from source) | `--group vllm` with `VLLM_TARGET_DEVICE=empty` (or install the prebuilt `vllm-torchtpu==0.33.0` wheel). |
+pin are base dependencies, so a plain `uv pip install -e .` covers it.
 
 ## Python 3.12 Virtual Environment
 
 `vllm-omni-torchtpu` requires Python 3.12 (`>=3.12,<3.13`) because TPU runtime
-wheels target `cp312` only. Create a virtual environment with `uv` (`>= 0.6`),
-install the prebuilt `vllm-torchtpu==0.33.0` wheel, and then install this
-repository with the `test` group:
+wheels target `cp312` only. Clone the repository, create a virtual environment
+in the repository root with `uv` (`>= 0.6`), install the prebuilt
+`vllm-torchtpu==0.33.0` wheel, and then install this repository with the `test`
+group:
 
 ```bash
-uv venv --python 3.12 ~/venvs/vllm-omni-torchtpu
-source ~/venvs/vllm-omni-torchtpu/bin/activate
 git clone https://github.com/vllm-project/vllm-omni-torchtpu.git
 cd vllm-omni-torchtpu
+uv venv --python 3.12
+source .venv/bin/activate
 
 uv pip install --torch-backend cpu "vllm-torchtpu==0.33.0"
 uv pip install --torch-backend cpu -e . --group test
@@ -54,9 +49,9 @@ floor. `SETUPTOOLS_SCM_PRETEND_VERSION_FOR_VLLM_TORCHTPU_CORE=0.34.0.dev0` is
 needed only with `--group core-git`. If `uv` already cached an earlier git build
 of `vllm-torchtpu-core`, run `uv cache clean vllm-torchtpu-core` first.
 
-If you prefer to build `vllm` `v0.33.0` from source in one step instead of using
-the prebuilt `vllm-torchtpu==0.33.0` wheel, pass `VLLM_TARGET_DEVICE=empty` and
-`--group vllm`:
+If you prefer to build `vllm` from source in one step instead of using the
+prebuilt `vllm-torchtpu==0.33.0` wheel, pass `VLLM_TARGET_DEVICE=empty` and
+`--group vllm`, which builds the `vllm` tag pinned in `pyproject.toml`:
 
 ```bash
 VLLM_TARGET_DEVICE=empty \

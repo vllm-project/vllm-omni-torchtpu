@@ -51,7 +51,8 @@ This pipeline shares infrastructure and scheduling rules with
   `tpu-pr/<author-email>` (`concurrency: 40`, `eager`), sharing one 40-job cap
   across `vllm-torchtpu` and `vllm-omni-torchtpu` PRs.
 - **PR labels**: `oncall-fix` selects the `oncall-fix` priority class,
-  `skip-tpu-ci` strips all TPU steps, and `run-full-ci` substitutes `NIGHTLY=1`
+  `skip-tpu-ci` strips all TPU steps and sets `OMNI_IMAGE_SKIP` to skip
+  `build_docker_omni`, and `run-full-ci` substitutes `NIGHTLY=1`
   (`skip-tpu-ci` and `run-full-ci` are mutually exclusive).
 - **Artifact Registry and GCS**: `setup_docker_env.sh` pushes to
   `us-central1-docker.pkg.dev/cloud-ullm-inference-ci-cd/vllm-torchtpu-ci/vllm-omni-torchtpu`

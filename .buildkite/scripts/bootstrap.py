@@ -638,7 +638,8 @@ def run_bootstrap(
     nightly = ctx.nightly_env or ctx.is_full_ci
     if not ctx.runs_tpu:
         suite_name = "cpu-only"
-        suite_about = "Omni Docker image build only, no TPU steps"
+        suite_about = "TPU steps and Omni Docker image skipped (skip-tpu-ci)"
+        child_env["OMNI_IMAGE_SKIP"] = "skip-tpu-ci: no TPU step uses the -omni image"
     elif nightly:
         suite_name = "pr+nightly-suite" if ctx.is_pr else "full"
         suite_about = "Omni Docker image build and full nightly TPU test suite"

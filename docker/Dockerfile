@@ -32,6 +32,9 @@ WORKDIR /workspace/vllm-omni-torchtpu
 # `dev` image installs core editable from `/workspace/vllm-torchtpu` and puts
 # `/workspace/vllm-torchtpu/src` on PYTHONPATH, so remove that tree first to
 # prevent an older checkout from shadowing the reinstalled package.
+# uv builds the commit without release tags, so setuptools-scm would stamp a
+# version below the `>=0.33.0` floor and the next step would swap in the PyPI
+# 0.33.0 wheel; the PRETEND version keeps this git build installed.
 ARG CORE_COMMIT=a0275aad4f81a8befa40f8dc7a3fbeebaaff4355
 RUN rm -rf /workspace/vllm-torchtpu && \
     SETUPTOOLS_SCM_PRETEND_VERSION_FOR_VLLM_TORCHTPU_CORE=0.34.0.dev0 \
@@ -39,7 +42,7 @@ RUN rm -rf /workspace/vllm-torchtpu && \
       "vllm-torchtpu-core @ git+https://github.com/vllm-project/vllm-torchtpu.git@${CORE_COMMIT}"
 
 # Pre-install omni and test dependencies before copying the full tree so edits
-# under src/ or tests_omni/ reuse this layer. `--group vllm` keeps vLLM's source
+# under src/ or tests/ reuse this layer. `--group vllm` keeps vLLM's source
 # pin in resolution so vllm-omni cannot replace it with a PyPI vllm wheel.
 COPY pyproject.toml README.md LICENSE ./
 ARG VLLM_COMMIT_HASH=""

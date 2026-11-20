@@ -30,6 +30,8 @@ export WORKLOAD_IMAGE
 
 export FORCE_COLOR="1"
 export TQDM_MININTERVAL="30"
+# core-git builds carry no release tags; stamp a version above the
+# vllm-torchtpu-core>=0.33.0 floor (see README).
 export SETUPTOOLS_SCM_PRETEND_VERSION_FOR_VLLM_TORCHTPU_CORE="0.34.0.dev0"
 export VLLM_PLUGINS="${VLLM_PLUGINS:-torchtpu_omni,torchtpu_layers,vllm_omni_register_models}"
 export UV_NO_CACHE="1"

@@ -32,9 +32,9 @@ Maintainers ported [`pipeline.yml`](pipeline.yml) from
 | Step key | Condition | Shape and queue | Marker filter and timeout |
 | :--- | :--- | :--- | :--- |
 | `build_docker_omni` | Always (unless `OMNI_IMAGE_SKIP` is set) | `cpu_64_core` | Builds `docker/Dockerfile` (`--target omni`) and publishes `CI_IMAGE_TAG-omni`. |
-| `unit_tests_omni_pr` | `NIGHTLY != "1"` | `tpu7x-standard-1t/1x1x1` (`kube`) | `tests_omni/**/{test_*,*_test}.py`, `-m 'not nightly'`, `--timeout=1200`. |
-| `unit_tests_omni_nightly` | `NIGHTLY == "1"` | `tpu7x-standard-1t/1x1x1` (`kube`) | `tests_omni/**/{test_*,*_test}.py`, `-m 'not multichip'`, `--timeout=1800`. |
-| `unit_tests_omni_multichip_nightly` | `NIGHTLY == "1"` | `tpu7x-standard-4t/2x2x1` (`kube`) | `tests_omni/**/{test_*,*_test}.py`, `-m 'multichip'`, `--timeout=1800`. |
+| `unit_tests_omni_pr` | `NIGHTLY != "1"` | `tpu7x-standard-1t/1x1x1` (`kube`) | `tests/**/{test_*,*_test}.py`, `-m 'not nightly'`, `--timeout=1200`. |
+| `unit_tests_omni_nightly` | `NIGHTLY == "1"` | `tpu7x-standard-1t/1x1x1` (`kube`) | `tests/**/{test_*,*_test}.py`, `-m 'not multichip'`, `--timeout=1800`. |
+| `unit_tests_omni_multichip_nightly` | `NIGHTLY == "1"` | `tpu7x-standard-4t/2x2x1` (`kube`) | `tests/**/{test_*,*_test}.py`, `-m 'multichip'`, `--timeout=1800`. |
 
 ## Shared Capacity with `vllm-torchtpu` (`vllm` Buildkite Org)
 

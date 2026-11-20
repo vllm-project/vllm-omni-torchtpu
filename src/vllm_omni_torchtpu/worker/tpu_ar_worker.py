@@ -13,6 +13,8 @@
 # limitations under the License.
 """TPU worker for autoregressive vLLM-Omni stages."""
 
+from typing import Any
+
 from vllm_omni.worker.mixins import OmniWorkerMixin
 from vllm_torchtpu.worker.tpu_worker import TPUWorker
 
@@ -26,12 +28,9 @@ def _require_core_model_runner_cls(worker_cls: type) -> None:
         raise ImportError(
             "vllm-omni-torchtpu requires a vllm-torchtpu-core build that defines "
             "TPUWorker.model_runner_cls (vllm-project/vllm-torchtpu#2065, newer "
-            "than 0.33.0). Install with `--group core-git` or upgrade "
-            "vllm-torchtpu-core."
+            "than 0.33.0). Install with `--group core-git` (see README) until "
+            "vllm-torchtpu-core>=0.34.0 is on PyPI."
         )
-
-
-_require_core_model_runner_cls(TPUWorker)
 
 
 class TPUARWorker(OmniWorkerMixin, OmniTPUWorkerBase):
@@ -40,6 +39,16 @@ class TPUARWorker(OmniWorkerMixin, OmniTPUWorkerBase):
     ``OmniTpuPlatform.get_omni_ar_worker_cls`` points vLLM-Omni here. The
     worker only swaps in the AR runner; ``TPUARModelRunner`` decides which
     stages it serves.
+
+    The core version check runs when the worker is built, not at import,
+    so the package still imports against vllm-torchtpu-core 0.33.0. Other
+    stages do not use this worker.
     """
 
     model_runner_cls = TPUARModelRunner
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        # Older cores ignore model_runner_cls and would silently run the
+        # default TPUModelRunner for AR stages.
+        _require_core_model_runner_cls(TPUWorker)
+        super().__init__(*args, **kwargs)

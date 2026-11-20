@@ -24,10 +24,12 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
 ]
 dependencies = [
-    # Needs core hooks landed after the 0.33.0 release (vllm-torchtpu#2065 and
-    # #3304). Until a >=0.34.0 core wheel is on PyPI, install with `--group
-    # core-git` and `SETUPTOOLS_SCM_PRETEND_VERSION_FOR_VLLM_TORCHTPU_CORE=0.34.0.dev0`.
-    "vllm-torchtpu-core>=0.34.0.dev0",
+    # Floor at the newest PyPI release so a plain install resolves without
+    # version overrides. TPUARWorker (Qwen3-Omni AR stages) also needs
+    # TPUWorker.model_runner_cls from vllm-torchtpu#2065, newer than 0.33.0,
+    # and raises an ImportError without it. Until a >=0.34.0 core wheel is on
+    # PyPI, CI and TPU runs add `--group core-git` (see README).
+    "vllm-torchtpu-core>=0.33.0",
     # vLLM-Omni dependency. vllm-omni keeps major.minor aligned with vLLM.
     "vllm-omni==0.32.0rc1",
     # vllm-omni pulls torchaudio through s3tokenizer. The PyPI torchaudio is a
@@ -61,7 +63,10 @@ torchtpu_omni = "vllm_omni_torchtpu:register_tpu_platform_alias"
 # The omni code cut at a0275aad4f81a8befa40f8dc7a3fbeebaaff4355 needs
 # vllm-torchtpu-core changes newer than the 0.33.0 release (vllm-torchtpu#2065
 # and #3304, including TPUWorker.model_runner_cls and the guarded worker_cls
-# default in TpuPlatform).
+# default in TpuPlatform). uv builds this commit without release tags, so
+# setuptools-scm stamps a version below the >=0.33.0 floor; set
+# SETUPTOOLS_SCM_PRETEND_VERSION_FOR_VLLM_TORCHTPU_CORE=0.34.0.dev0 when
+# installing this group.
 core-git = [
     "vllm-torchtpu-core @ git+https://github.com/vllm-project/vllm-torchtpu.git@a0275aad4f81a8befa40f8dc7a3fbeebaaff4355",
 ]
@@ -71,7 +76,6 @@ core-git = [
 # on top would overwrite it. Opt in with `pip install -e . --group vllm`.
 vllm = [
     # Note: we **intentionally** build vllm from source, see README.
-    # Keep vllm_test_utils on the same upstream tag below.
     "vllm @ git+https://github.com/vllm-project/vllm.git@v0.33.0",
 ]
 
@@ -83,19 +87,16 @@ test = [
     "pytest-timeout",
     "pytest-cov",
     "parameterized",
-    # Not published on PyPI; lives in vLLM's tests/ directory.
-    "vllm_test_utils @ git+https://github.com/vllm-project/vllm.git@v0.33.0#subdirectory=tests/vllm_test_utils",
 ]
 
 [tool.pytest.ini_options]
-testpaths = ["tests_omni"]
+testpaths = ["tests"]
 pythonpath = ["."]
 markers = [
     "tpu_test: tests that require TPU hardware; CI runs them on a single-host TPU agent",
     "nightly: tests that only run in the nightly CI workflow",
     "multichip: tests that need more than 2 TPU chips; CI runs them on an 8-chip agent",
     "spawns_tpu_workers: tests that spawn a torch.distributed.run worker group spanning the TPU slice; must run before any in-process TPU test in the same pytest session",
-    "omni: tests that run omni multimodal and diffusion models",
 ]
 
 [tool.ruff]
@@ -121,7 +122,7 @@ ignore = [
 ]
 
 [tool.ruff.lint.isort]
-known-first-party = ["vllm_omni_torchtpu", "tests_omni"]
+known-first-party = ["vllm_omni_torchtpu", "tests"]
 
 [tool.ruff.lint.per-file-ignores]
 # Library code logs through vllm_torchtpu.logger. Tests, scripts and

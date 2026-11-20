@@ -60,14 +60,14 @@ plugins and raise `RuntimeError` until core removes its legacy omni entry point.
 
 ## Running CPU Checks
 
-`tests_omni/conftest.py` sets the `VLLM_PLUGINS` default automatically before
+`tests/conftest.py` sets the `VLLM_PLUGINS` default automatically before
 `pytest` imports `vllm`. On a CPU host without TPU devices, run the packaging
 entry-point test and verify full test collection:
 
 ```bash
-pytest tests_omni/test_packaging.py
-pytest tests_omni --collect-only -q
+pytest tests/test_packaging.py
+pytest tests --collect-only -q
 ```
 
-Model and worker tests in `tests_omni/` synchronize the TPU accelerator during
+Model and worker tests in `tests/` synchronize the TPU accelerator during
 fixture setup and require a TPU host to execute.

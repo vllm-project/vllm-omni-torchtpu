@@ -38,5 +38,5 @@ We plan to support future hardware.
 - The `omni` extra pins a vLLM-Omni release; we bump it as new releases ship.
 - At each pin bump we recheck the runtime patches in `patches/` and drop
   obsolete ones.
-- Omni tests live in [`tests_omni/`](../../../tests_omni/).
+- Omni tests live in [`tests/`](../../../tests/).
 - Omni owners in [CODEOWNERS](../../../.github/CODEOWNERS) triage omni issues.

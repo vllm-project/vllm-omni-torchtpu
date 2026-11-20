@@ -20,6 +20,7 @@ import pytest
 import vllm.envs as vllm_envs
 
 from vllm_omni_torchtpu import register_tpu_platform_alias
+from vllm_omni_torchtpu.worker import tpu_ar_worker
 from vllm_omni_torchtpu.worker.tpu_ar_worker import _require_core_model_runner_cls
 
 EXPECTED_ENTRY_POINTS = {
@@ -74,3 +75,16 @@ def test_require_core_model_runner_cls_rejects_old_core() -> None:
         _require_core_model_runner_cls(_LegacyTPUWorker)
 
     _require_core_model_runner_cls(SimpleNamespace(model_runner_cls=object))
+
+
+def test_tpu_ar_worker_init_rejects_old_core(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The module imports on core 0.33.0; building the AR worker fails."""
+
+    class _LegacyTPUWorker:
+        pass
+
+    monkeypatch.setattr(tpu_ar_worker, "TPUWorker", _LegacyTPUWorker)
+    with pytest.raises(ImportError, match="core-git"):
+        tpu_ar_worker.TPUARWorker()

@@ -24,10 +24,12 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
 ]
 dependencies = [
-    # Needs core hooks landed after the 0.33.0 release (vllm-torchtpu#2065 and
-    # #3304). Until a >=0.34.0 core wheel is on PyPI, install with `--group
-    # core-git` and `SETUPTOOLS_SCM_PRETEND_VERSION_FOR_VLLM_TORCHTPU_CORE=0.34.0.dev0`.
-    "vllm-torchtpu-core>=0.34.0.dev0",
+    # Floor at the newest PyPI release so a plain install resolves without
+    # version overrides. TPUARWorker (Qwen3-Omni AR stages) also needs
+    # TPUWorker.model_runner_cls from vllm-torchtpu#2065, newer than 0.33.0,
+    # and raises an ImportError without it. Until a >=0.34.0 core wheel is on
+    # PyPI, CI and TPU runs add `--group core-git` (see README).
+    "vllm-torchtpu-core>=0.33.0",
     # vLLM-Omni dependency. vllm-omni keeps major.minor aligned with vLLM.
     "vllm-omni==0.32.0rc1",
     # vllm-omni pulls torchaudio through s3tokenizer. The PyPI torchaudio is a
@@ -61,7 +63,10 @@ torchtpu_omni = "vllm_omni_torchtpu:register_tpu_platform_alias"
 # The omni code cut at a0275aad4f81a8befa40f8dc7a3fbeebaaff4355 needs
 # vllm-torchtpu-core changes newer than the 0.33.0 release (vllm-torchtpu#2065
 # and #3304, including TPUWorker.model_runner_cls and the guarded worker_cls
-# default in TpuPlatform).
+# default in TpuPlatform). uv builds this commit without release tags, so
+# setuptools-scm stamps a version below the >=0.33.0 floor; set
+# SETUPTOOLS_SCM_PRETEND_VERSION_FOR_VLLM_TORCHTPU_CORE=0.34.0.dev0 when
+# installing this group.
 core-git = [
     "vllm-torchtpu-core @ git+https://github.com/vllm-project/vllm-torchtpu.git@a0275aad4f81a8befa40f8dc7a3fbeebaaff4355",
 ]

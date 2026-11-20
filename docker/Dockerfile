@@ -13,12 +13,17 @@
 # limitations under the License.
 
 # Omni image for vllm-omni-torchtpu, layered on the upstream vllm-torchtpu
-# developer image (`vllm/vllm-torchtpu:nightly` on Docker Hub, pinned by digest
-# alongside `CORE_COMMIT` so CI builds stay reproducible).
+# developer image. Docker Hub publishes a dated per-commit tag for every
+# nightly (`nightly-<date>-<vllm-torchtpu commit>-<vllm tag>`); the default
+# pins one by digest alongside `CORE_COMMIT` so CI builds stay reproducible.
+# Release tags such as `v0.33.0` are the slimmer `prod` variant without the
+# test tooling (bktec, buildkite-agent, gcloud) the TPU pipeline needs, so
+# override `BASE_IMAGE` (setup_docker_env.sh reads it from the environment)
+# only with another `nightly-*` developer image.
 #
 # Build from the repository root:
 #   DOCKER_BUILDKIT=1 docker build -f docker/Dockerfile -t vllm-omni-torchtpu:dev .
-ARG BASE_IMAGE=vllm/vllm-torchtpu:nightly@sha256:43d090dac793f9dfa2fcf4339c915fed0d10438d618068436fc37a959df56ff9
+ARG BASE_IMAGE=vllm/vllm-torchtpu:nightly-20261112-e9cf148-v0.33.0@sha256:43d090dac793f9dfa2fcf4339c915fed0d10438d618068436fc37a959df56ff9
 FROM ${BASE_IMAGE} AS omni
 
 # vllm-omni depends on opencv-python (not -headless), whose cv2 links libGL and
@@ -42,8 +47,12 @@ RUN rm -rf /workspace/vllm-torchtpu && \
       "vllm-torchtpu-core @ git+https://github.com/vllm-project/vllm-torchtpu.git@${CORE_COMMIT}"
 
 # Pre-install omni and test dependencies before copying the full tree so edits
-# under src/ or tests/ reuse this layer. `--group vllm` keeps vLLM's source
-# pin in resolution so vllm-omni cannot replace it with a PyPI vllm wheel.
+# under src/ or tests/ reuse this layer. The base image already ships vLLM, and
+# nothing in this package's dependencies requires `vllm`, so a plain install
+# leaves the base image's vLLM untouched. When `VLLM_COMMIT_HASH` is set (CI
+# always passes it), the `vllm` group is added at that commit so vLLM's
+# dependency pins constrain the resolution and a different commit is rebuilt
+# from source (`VLLM_TARGET_DEVICE=empty` comes from the base image).
 COPY pyproject.toml README.md LICENSE ./
 ARG VLLM_COMMIT_HASH=""
 RUN if [ -n "$VLLM_COMMIT_HASH" ]; then \
@@ -51,10 +60,12 @@ RUN if [ -n "$VLLM_COMMIT_HASH" ]; then \
     fi
 
 RUN --mount=type=cache,target=/root/.cache/uv \
+    set --; \
+    if [ -n "$VLLM_COMMIT_HASH" ]; then set -- --group vllm; fi; \
     uv pip install --system \
       -r pyproject.toml \
-      --group vllm \
-      --group test
+      --group test \
+      "$@"
 
 COPY . .
 RUN if [ -n "$VLLM_COMMIT_HASH" ]; then \

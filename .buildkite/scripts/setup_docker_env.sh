@@ -67,7 +67,7 @@ if [[ "${CI_IMAGE_REBUILD:-0}" != "1" ]] \
   exit 0
 fi
 
-BASE_IMAGE="${BASE_IMAGE:-vllm/vllm-torchtpu:nightly@sha256:43d090dac793f9dfa2fcf4339c915fed0d10438d618068436fc37a959df56ff9}"
+BASE_IMAGE="${BASE_IMAGE:-vllm/vllm-torchtpu:nightly-20261112-e9cf148-v0.33.0@sha256:43d090dac793f9dfa2fcf4339c915fed0d10438d618068436fc37a959df56ff9}"
 
 echo "--- Building Docker Image: ${BASE_IMAGE_TAG} (target: ${TARGET})"
 DOCKER_ARGS=(

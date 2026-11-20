@@ -29,8 +29,8 @@ import pytest
 
 pytest.importorskip("vllm_omni", reason="vllm_omni is required for Wan tests")
 
-from tests_omni.conftest import OmniRunner
-from tests_omni.models.wan.utils import (
+from tests.conftest import OmniRunner
+from tests.models.wan.utils import (
     WAN2_1_I2V_14B_480P,
     WAN2_1_I2V_14B_720P,
     WAN2_1_T2V_14B,

@@ -29,7 +29,7 @@ from vllm_omni import Omni
 from vllm_omni.inputs.data import OmniDiffusionSamplingParams
 from vllm_omni.model_extras import build_image_to_image_prompt, get_model_class_name
 
-from tests_omni.omni_test_utils import compute_ssim, high_freq_energy
+from tests.omni_test_utils import compute_ssim, high_freq_energy
 
 pytestmark = [
     pytest.mark.omni,

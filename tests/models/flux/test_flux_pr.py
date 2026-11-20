@@ -25,8 +25,8 @@ import pytest
 from PIL import Image
 from vllm_omni.inputs.data import OmniDiffusionSamplingParams
 
-from tests_omni.conftest import OmniRunner
-from tests_omni.omni_test_utils import compute_ssim, high_freq_energy
+from tests.conftest import OmniRunner
+from tests.omni_test_utils import compute_ssim, high_freq_energy
 
 pytestmark = [
     pytest.mark.omni,

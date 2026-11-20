@@ -77,7 +77,7 @@ from vllm_omni.diffusion.models.wan2_2.wan2_2_vace_transformer import (
     WanVACETransformer3DModel,
 )
 
-from tests_omni.omni_test_utils import assert_all_loaded, assert_parity
+from tests.omni_test_utils import assert_all_loaded, assert_parity
 from vllm_omni_torchtpu.patches import apply_omni_model_specific_patches
 from vllm_omni_torchtpu.rope import can_fuse_qk_norm_rope
 

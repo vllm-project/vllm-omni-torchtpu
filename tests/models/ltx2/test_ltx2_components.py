@@ -81,7 +81,7 @@ from vllm_omni.diffusion.models.ltx2.ltx2_transformer import (
 from vllm_omni.diffusion.vllm_config import create_diffusion_vllm_config
 from vllm_omni.platforms import current_omni_platform
 
-from tests_omni.omni_test_utils import assert_all_loaded, assert_parity
+from tests.omni_test_utils import assert_all_loaded, assert_parity
 from vllm_omni_torchtpu.rope import split_rope_natural_tables
 
 pytestmark = [pytest.mark.omni]

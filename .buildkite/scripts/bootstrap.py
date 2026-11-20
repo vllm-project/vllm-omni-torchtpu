@@ -641,7 +641,9 @@ def run_bootstrap(
         suite_about = "TPU steps and Omni Docker image skipped (skip-tpu-ci)"
         child_env["OMNI_IMAGE_SKIP"] = "skip-tpu-ci: no TPU step uses the -omni image"
     elif nightly:
-        suite_name = "pr+nightly-suite" if ctx.is_pr else "full"
+        suite_name = (
+            "pr+nightly-suite" if ctx.is_full_ci else ("pr" if ctx.is_pr else "full")
+        )
         suite_about = "Omni Docker image build and full nightly TPU test suite"
     else:
         suite_name = "pr" if ctx.is_pr else "default"

@@ -33,7 +33,7 @@ x-tpu-step-defaults: &tpu_step
     queue: "kube"
 
 x-tests-plugin-defaults: &tests_plugin_defaults
-  suite-slug: "${TEST_ENGINE_SUITE_SLUG:-tpu-ci}"
+  suite-slug: tpu-ci
   test-runner: pytest
   test-file-pattern: "tests/**/{test_*,*_test}.py"
   install-client: false
@@ -48,7 +48,6 @@ steps:
     steps:
       - label: ":docker: Build and Push Omni CI Image"
         key: "build_docker_omni"
-        skip: "${OMNI_IMAGE_SKIP:-}"
         agents:
           queue: cpu_64_core
         commands:

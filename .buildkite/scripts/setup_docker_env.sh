@@ -84,11 +84,11 @@ fi
 
 DOCKER_BUILDKIT=1 docker build "${DOCKER_ARGS[@]}" "${REPO_ROOT}"
 
-buildkite-agent meta-data set "CI_IMAGE_TAG${IMAGE_SUFFIX}" "${BASE_IMAGE_TAG}"
-buildkite-agent meta-data set "CI_IMAGE_TAG" "${BASE_IMAGE_TAG}"
-
 echo "--- Pushing Docker Image to Registry"
 docker push "${BASE_IMAGE_TAG}"
+
+buildkite-agent meta-data set "CI_IMAGE_TAG${IMAGE_SUFFIX}" "${BASE_IMAGE_TAG}"
+buildkite-agent meta-data set "CI_IMAGE_TAG" "${BASE_IMAGE_TAG}"
 
 echo "--- Cleaning up local built image"
 docker rmi "${BASE_IMAGE_TAG}" || true

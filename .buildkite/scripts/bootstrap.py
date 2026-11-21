@@ -16,7 +16,7 @@
 # Derived from vllm-project/vllm-torchtpu `.buildkite/scripts/bootstrap.py` at
 # commit a0275aad4f81a8befa40f8dc7a3fbeebaaff4355, trimmed to upload the single
 # `.buildkite/pipeline.yml` without multi-stage, merge-queue, dev, perf,
-# pre-commit, or release flows.
+# pre-commit, release, or `skip-tpu-ci` flows.
 """Bootstrap the Buildkite CI pipeline for `vllm-omni-torchtpu`.
 
 Compatible with Python 3.10+ stdlib on `queue=cpu` (invoked by `bootstrap.sh`).
@@ -24,7 +24,6 @@ Compatible with Python 3.10+ stdlib on `queue=cpu` (invoked by `bootstrap.sh`).
 
 from __future__ import annotations
 
-import http.client
 import io
 import json
 import os
@@ -32,21 +31,14 @@ import pathlib
 import re
 import subprocess
 import sys
-import urllib.error
-import urllib.request
 from collections.abc import Mapping, Sequence
-from dataclasses import dataclass, replace
-from typing import Any
+from dataclasses import dataclass
 
 import cap_pr_tpu_concurrency
 
 _SCRIPT_DIR = pathlib.Path(__file__).resolve().parent
 _REPO_ROOT = _SCRIPT_DIR.parents[1]
 _PIPELINE_FILE = ".buildkite/pipeline.yml"
-_CREDENTIAL_HELPER = pathlib.Path("/etc/buildkite-agent/git-credential-github-app")
-_GITHUB_API_URL = "https://api.github.com"
-_DEFAULT_GITHUB_REPO = "vllm-project/vllm-omni-torchtpu"
-_GITHUB_REPO_RE = re.compile(r"github\.com[:/]([^/\s]+/[^/\s]+?)(?:\.git)?/?$")
 
 # Max TPU jobs one author's PR builds may have in flight on kube (~2 PRs at ~19
 # jobs); extra jobs wait in Buildkite as `limited` and take no Kueue slot, while
@@ -55,7 +47,6 @@ PR_TPU_JOBS_PER_AUTHOR = 40
 
 # History depths tried, in order, until a PR's merge-base with its base is found.
 _PR_FETCH_DEPTHS = (20, 200, 1000)
-_PR_SUITE_LABELS = ("skip-tpu-ci", "run-full-ci")
 
 
 class BootstrapError(Exception):
@@ -72,11 +63,6 @@ def _split_labels(raw: str) -> tuple[str, ...]:
     return tuple(item for item in raw.split(",") if item)
 
 
-def _resolve_github_repo(repo_url: str) -> str:
-    match = _GITHUB_REPO_RE.search(repo_url.strip())
-    return match.group(1) if match else _DEFAULT_GITHUB_REPO
-
-
 @dataclass(frozen=True)
 class BuildContext:
     """Immutable snapshot of the build environment read at startup."""
@@ -85,7 +71,6 @@ class BuildContext:
     commit: str
     message: str
     source: str
-    github_repo: str
     pull_request: str | None
     pr_base_branch: str
     labels: tuple[str, ...]
@@ -100,10 +85,6 @@ class BuildContext:
         return self.pull_request is not None
 
     @property
-    def is_post_merge(self) -> bool:
-        return not self.is_pr and self.branch == "main" and self.source == "webhook"
-
-    @property
     def is_oncall_fix(self) -> bool:
         return self.is_pr and "oncall-fix" in self.labels
 
@@ -111,30 +92,8 @@ class BuildContext:
     def is_full_ci(self) -> bool:
         return self.is_pr and "run-full-ci" in self.labels
 
-    @property
-    def runs_tpu(self) -> bool:
-        return "skip-tpu-ci" not in self.labels
-
-    def check_suite_labels(self) -> None:
-        """Raise `BootstrapError` if mutually exclusive PR suite labels are set."""
-        if not self.is_pr:
-            return
-        matches = [label for label in _PR_SUITE_LABELS if label in self.labels]
-        if len(matches) > 1:
-            joined = ", ".join(matches)
-            raise BootstrapError(
-                f"ERROR: PR labels {joined} are mutually exclusive. "
-                "Remove all but one of skip-tpu-ci / run-full-ci in the "
-                "**Labels** sidebar on the GitHub PR page, then retry the "
-                "**Bootstrap Pipeline** step."
-            )
-
     @classmethod
     def from_env(cls, env: Mapping[str, str]) -> BuildContext:
-        if _env_or(env, "SKIP_TPU_CI", "0").strip() != "0":
-            raise BootstrapError(
-                "ERROR: SKIP_TPU_CI was removed; use the skip-tpu-ci PR label"
-            )
         pr_raw = _env_or(env, "BUILDKITE_PULL_REQUEST", "false")
         pull_request = None if pr_raw == "false" else pr_raw
         labels = (
@@ -152,7 +111,6 @@ class BuildContext:
             commit=_env_or(env, "BUILDKITE_COMMIT", "HEAD"),
             message=env.get("BUILDKITE_MESSAGE", ""),
             source=env.get("BUILDKITE_SOURCE", ""),
-            github_repo=_resolve_github_repo(env.get("BUILDKITE_REPO", "")),
             pull_request=pull_request,
             pr_base_branch=_env_or(env, "BUILDKITE_PULL_REQUEST_BASE_BRANCH", "main"),
             labels=labels,
@@ -195,7 +153,6 @@ _DOCS_ONLY_RE = re.compile(
     r"(\.md$|\.ico$|\.png$|^README$|^docs/|^\.github/CODEOWNERS$"
     r"|^LICENSE$|^\.git-blame-ignore-revs$)"
 )
-_MERGED_PR_RE = re.compile(r"\(#([0-9]+)\)$")
 _VLLM_PIN_RE = re.compile(
     r".*vllm @ git\+https://github\.com/vllm-project/vllm\.git@([a-zA-Z0-9.-]+).*"
 )
@@ -213,13 +170,6 @@ def has_skip_ci_marker(message: str) -> bool:
 def only_docs_changed(files: Sequence[str]) -> bool:
     """Return True when `files` is non-empty and every path is non-code/docs."""
     return bool(files) and all(bool(_DOCS_ONLY_RE.search(path)) for path in files)
-
-
-def parse_merged_pr_number(message: str) -> str | None:
-    """Extract trailing `(#123)` PR number from the first line of a squash commit."""
-    first_line = message.splitlines()[0] if message else ""
-    match = _MERGED_PR_RE.search(first_line)
-    return match.group(1) if match else None
 
 
 def parse_pinned_vllm_commit(pyproject_text: str) -> str:
@@ -250,24 +200,8 @@ def prepare_upload_yaml(raw_yaml: str, *, job_priority: int, nightly: bool) -> s
     return f"priority: {job_priority}\n{body}"
 
 
-def _strip_tpu_steps(steps: list[Any]) -> list[Any]:
-    """Remove TPU steps (`holds_chips`) and any groups left empty."""
-    kept: list[Any] = []
-    for step in steps:
-        if not isinstance(step, dict):
-            kept.append(step)
-            continue
-        if isinstance(step.get("steps"), list):
-            sub = _strip_tpu_steps(step["steps"])
-            if sub:
-                kept.append({**step, "steps": sub})
-        elif not cap_pr_tpu_concurrency.holds_chips(step):
-            kept.append(step)
-    return kept
-
-
 # ---------------------------------------------------------------------------
-# Subprocess & GitHub helpers (monkeypatched in tests)
+# Subprocess helpers (monkeypatched in tests)
 # ---------------------------------------------------------------------------
 
 
@@ -391,89 +325,22 @@ def _changed_files(
     return []
 
 
-def _github_app_token(*, env: Mapping[str, str] | None = None) -> str | None:
-    if not _CREDENTIAL_HELPER.is_file():
-        return None
-    try:
-        proc = subprocess.run(
-            [str(_CREDENTIAL_HELPER), "get"],
-            cwd=_REPO_ROOT,
-            env=env,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.DEVNULL,
-            text=True,
-            timeout=10.0,
-            check=False,
-        )
-    except (OSError, subprocess.SubprocessError):
-        return None
-    for line in proc.stdout.splitlines():
-        if line.startswith("password="):
-            token = line.removeprefix("password=").strip()
-            if token:
-                return token
-    return None
-
-
-def _github_get(path: str, *, repo: str, token: str | None) -> str:
-    headers = {"Accept": "application/vnd.github+json"}
-    if token:
-        headers["Authorization"] = f"token {token}"
-    url = f"{_GITHUB_API_URL.rstrip('/')}/repos/{repo}/{path.lstrip('/')}"
-    with urllib.request.urlopen(
-        urllib.request.Request(url, headers=headers), timeout=10
-    ) as resp:
-        return resp.read().decode("utf-8")
-
-
-def _github_labels(
-    pr_number: str,
-    *,
-    repo: str = _DEFAULT_GITHUB_REPO,
-    env: Mapping[str, str] | None = None,
-) -> tuple[str, ...]:
-    """Read labels of a merged PR from GitHub; return `()` on any failure."""
-    try:
-        items = json.loads(
-            _github_get(
-                f"issues/{pr_number}/labels",
-                repo=repo,
-                token=_github_app_token(env=env),
-            )
-        )
-    except (
-        OSError,
-        urllib.error.URLError,
-        http.client.HTTPException,
-        ValueError,
-    ):
-        return ()
-    if not isinstance(items, list):
-        return ()
-    return tuple(
-        item["name"]
-        for item in items
-        if isinstance(item, dict) and isinstance(item.get("name"), str)
-    )
-
-
 def upload_with_priority(
     yaml_file: str,
     *,
     repo_root: pathlib.Path = _REPO_ROOT,
     job_priority: int,
     nightly: bool,
-    runs_tpu: bool = True,
     pr_tpu_concurrency_group: str | None,
     pr_tpu_jobs_per_author: int = PR_TPU_JOBS_PER_AUTHOR,
     env: Mapping[str, str],
 ) -> None:
-    """Upload one pipeline YAML file with priority, TPU filtering, and PR capping."""
+    """Upload one pipeline YAML file with priority and PR TPU capping."""
     print(f"--- :pipeline: Uploading {yaml_file} with priority {job_priority}")
     raw_yaml = (repo_root / yaml_file).read_text(encoding="utf-8")
     payload = prepare_upload_yaml(raw_yaml, job_priority=job_priority, nightly=nightly)
 
-    if not runs_tpu or pr_tpu_concurrency_group:
+    if pr_tpu_concurrency_group:
         dry_run = _agent(
             "pipeline",
             "upload",
@@ -493,20 +360,13 @@ def upload_with_priority(
                         "expected JSON object from --dry-run, "
                         f"got {type(pipeline).__name__}"
                     )
-                if not runs_tpu:
-                    pipeline["steps"] = _strip_tpu_steps(pipeline.get("steps") or [])
-                elif pr_tpu_concurrency_group:
-                    cap_pr_tpu_concurrency.cap(
-                        pipeline.get("steps") or [],
-                        pr_tpu_concurrency_group,
-                        pr_tpu_jobs_per_author,
-                    )
+                cap_pr_tpu_concurrency.cap(
+                    pipeline.get("steps") or [],
+                    pr_tpu_concurrency_group,
+                    pr_tpu_jobs_per_author,
+                )
                 rendered = json.dumps(pipeline) + "\n"
             except Exception as exc:
-                if not runs_tpu:
-                    raise BootstrapError(
-                        f"ERROR: failed to filter TPU steps for {yaml_file}: {exc}"
-                    ) from exc
                 print(
                     f"WARNING: failed to cap TPU concurrency for {yaml_file}: {exc}",
                     file=sys.stderr,
@@ -521,11 +381,6 @@ def upload_with_priority(
                     cwd=repo_root,
                 )
                 return
-        if not runs_tpu:
-            raise BootstrapError(
-                f"ERROR: buildkite-agent --dry-run failed while filtering TPU steps "
-                f"for {yaml_file} (exit {dry_run.returncode})"
-            )
         print(
             f"WARNING: could not put {yaml_file} in {pr_tpu_concurrency_group}; "
             "uploading it uncapped",
@@ -548,25 +403,6 @@ def run_bootstrap(
     """Execute the Buildkite bootstrap flow and return an exit status."""
     child_env = dict(os.environ if env is None else env)
     ctx = BuildContext.from_env(child_env)
-    # A post-merge build honors the merged PR's skip-tpu-ci label.
-    if ctx.is_post_merge and (pr := parse_merged_pr_number(ctx.message)):
-        ctx = replace(
-            ctx, labels=_github_labels(pr, repo=ctx.github_repo, env=child_env)
-        )
-    try:
-        ctx.check_suite_labels()
-    except BootstrapError as exc:
-        _agent(
-            "annotate",
-            "--style",
-            "error",
-            "--context",
-            "ci-labels",
-            str(exc),
-            env=child_env,
-            cwd=repo_root,
-        )
-        raise
 
     # 1. Kind and priority (metadata).
     print("--- Determining job priority")
@@ -636,11 +472,7 @@ def run_bootstrap(
 
     # 4. Suite policy, NIGHTLY export, and concurrency group.
     nightly = ctx.nightly_env or ctx.is_full_ci
-    if not ctx.runs_tpu:
-        suite_name = "cpu-only"
-        suite_about = "TPU steps and Omni Docker image skipped (skip-tpu-ci)"
-        child_env["OMNI_IMAGE_SKIP"] = "skip-tpu-ci: no TPU step uses the -omni image"
-    elif nightly:
+    if nightly:
         suite_name = (
             "pr+nightly-suite" if ctx.is_full_ci else ("pr" if ctx.is_pr else "full")
         )
@@ -670,12 +502,10 @@ def run_bootstrap(
     # Key the concurrency group on the commit author's email: every webhook
     # build carries it, whereas BUILDKITE_BUILD_CREATOR_EMAIL is missing when
     # the GitHub account is not linked to a Buildkite user.
-    if ctx.is_pr and ctx.author_email and ctx.runs_tpu:
+    if ctx.is_pr and ctx.author_email:
         concurrency_group: str | None = f"tpu-pr/{ctx.author_email.lower()}"
     else:
-        concurrency_group = (
-            (ctx.pr_tpu_concurrency_group_env or None) if ctx.runs_tpu else None
-        )
+        concurrency_group = ctx.pr_tpu_concurrency_group_env or None
     if concurrency_group is not None:
         child_env["PR_TPU_CONCURRENCY_GROUP"] = concurrency_group
 
@@ -685,7 +515,6 @@ def run_bootstrap(
         repo_root=repo_root,
         job_priority=job_priority,
         nightly=nightly,
-        runs_tpu=ctx.runs_tpu,
         pr_tpu_concurrency_group=concurrency_group,
         env=child_env,
     )

@@ -32,6 +32,8 @@ from typing import Any
 import torch
 from vllm_torchtpu.logger import init_logger
 
+from vllm_omni_torchtpu.patches.ltx2 import apply_ltx2_patches
+
 logger = init_logger(__name__)
 
 
@@ -87,6 +89,7 @@ def apply_omni_model_specific_patches() -> None:
     _patch_wan_fresh_timestep()
     _patch_sdpa_fallback_dispatch()
     _patch_ltx2_vocoder_cpu_init()
+    apply_ltx2_patches()
 
 
 def _patch_diffusion_ipc_cpu_pack() -> None:

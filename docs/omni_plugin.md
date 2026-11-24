@@ -17,7 +17,8 @@ Before you work on a new feature, bug fix, or model in `vllm-omni-torchtpu`:
 
 1. Open an issue in this repository first to propose the change.
 2. Wait for a repository maintainer to confirm the scope on the issue before
-   starting work (standalone `CODEOWNERS` and `CONTRIBUTING.md` policies are
-   pending post-split setup).
-3. Link the issue in your pull request and run the local verification commands
-   in [testing.md](testing.md).
+   starting work (standalone `CODEOWNERS` governance is pending post-split
+   setup).
+3. Link the issue in your pull request, follow [CONTRIBUTING.md](../CONTRIBUTING.md)
+   and [coding_guidance.md](developers_guide/coding_guidance.md), and run the
+   local verification commands in [testing.md](testing.md).

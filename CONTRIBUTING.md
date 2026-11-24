@@ -1,0 +1,333 @@
+# Contributing to vllm-omni-torchtpu
+
+Thank you for your interest in contributing to `vllm-omni-torchtpu`! Our
+community is open to everyone and welcomes all kinds of contributions, no
+matter how small or large:
+
+* Identify and report issues or bugs.
+* Request or add support for a new model.
+* Suggest or implement new performance optimizations or features.
+* Improve documentation, examples, or tutorials.
+
+Answering questions, offering PR reviews, and assisting fellow contributors are
+equally valued contributions. Before writing code, follow the coding rules in
+[coding_guidance.md](docs/developers_guide/coding_guidance.md) (`R-1.x`–`R-8.x`)
+and [AGENTS.md](AGENTS.md).
+
+---
+
+## 1. Philosophy & Review Expectations
+
+* **Small, Focused Pull Requests**: We strongly prioritize concise, well-tested
+  pull requests that address a single clear objective over sprawling,
+  multi-purpose rewrites. Keep behavior-preserving refactors, dependency pin
+  bumps, and new features or patches in separate PRs (`R-7.1`–`R-7.3`).
+* **Stacked PRs**: Each PR in a stack must build, pass tests, and make sense on
+  its own. Do not reference helpers or hooks that land in a later PR, and do not
+  add code that the next PR in the stack immediately replaces. Because
+  contributions are primarily fork-based, target `main` on every PR so CI runs,
+  and keep dependent PRs as **Draft** with their stack dependencies listed at
+  the top of the description (e.g., `Depends on #<PR>`) until earlier PRs merge.
+* **Keep Metadata Synced with HEAD**: Update the PR title, description,
+  docstrings, comments, and test logs whenever the implementation changes. State
+  any unsupported scope explicitly in the PR body (`R-7.11`).
+* **Value of Quality Bug Reports**: Submitting a clear bug report with a Minimal
+  Reproducible Example (MRE) is a first-class contribution.
+* **Main Branch Stability (Revert-on-Breakage)**: We maintain a strict
+  revert-on-breakage policy to keep `main` dependable for all developers. If a
+  merged PR introduces regressions in nightly suites, it will be promptly
+  reverted rather than fixed forward on `main`.
+* **Evidence for Output or Perf Changes**: Changes that affect model outputs or
+  add an opt-in tradeoff knob must include before/after parity against a
+  CPU/fp32 reference or golden baseline (plus visual/audio comparisons where
+  applicable) and a clear plan for enabling the knob by default (`R-8.10`).
+
+---
+
+## 2. Setting Up Your Development Environment
+
+### 1. Developer Certificate of Origin (DCO)
+
+Contributions to this project must be accompanied by a Developer Certificate of
+Origin sign-off (see [DCO](DCO)). Commits must include a `Signed-off-by:` header
+certifying agreement with the DCO.
+
+Create signed commits using `git commit -s`, which automatically appends the
+trailer:
+
+```text
+Signed-off-by: Your Name <your.email@example.com>
+```
+
+If you forget to sign off a commit, amend it and force-push:
+
+```bash
+git commit --amend --signoff --no-edit
+git push origin HEAD --force-with-lease
+```
+
+### 2. Clone and Install Dependencies
+
+Follow [docs/installation.md](docs/installation.md) to set up a Python 3.12
+virtual environment (`uv` recommended):
+
+```bash
+git clone https://github.com/vllm-project/vllm-omni-torchtpu.git
+cd vllm-omni-torchtpu
+uv venv --python 3.12
+source .venv/bin/activate
+
+uv pip install --torch-backend cpu "vllm-torchtpu==0.33.0"
+uv pip install --torch-backend cpu -e . --group test
+export VLLM_PLUGINS=torchtpu_omni,torchtpu_layers,vllm_omni_register_models
+```
+
+See [docs/installation.md](docs/installation.md) for using `--group core-git`
+or building `vllm` from source with `--group vllm`.
+
+### 3. Pre-commit Hooks
+
+Activate your virtual environment before installing and running `pre-commit`:
+
+```bash
+# Install pre-commit hooks in the active environment
+pre-commit install --hook-type pre-commit --hook-type commit-msg
+
+# Run manually across all files:
+pre-commit run --all-files
+```
+
+`.github/workflows/ci.yml` runs `ruff check`, `ruff format --check`,
+`pre-commit run --all-files`, and wheel/entry-point validation on every PR.
+
+---
+
+## 3. Issues, RFCs, and Duplicate Checks
+
+### Check for Duplicate Work
+
+Before opening a new issue or starting work on a feature, search existing issues
+and open pull requests (`R-7.8`):
+
+```bash
+gh issue view <issue_number> --repo vllm-project/vllm-omni-torchtpu --comments
+gh pr list --repo vllm-project/vllm-omni-torchtpu --state open --search "<short area keywords>"
+```
+
+Wait for a repository maintainer to confirm scope on new feature, bug fix, or
+model issues before starting work. If an open PR already addresses the issue,
+collaborate on the existing thread instead of opening a duplicate.
+
+### Proposing Major Changes (>500 LOC RFC Requirement)
+
+Following upstream vLLM conventions, any PR introducing major architectural
+changes or exceeding **500 lines of core logic** (excluding tests, configs, and
+autogenerated files) requires an initial GitHub Issue (RFC) to discuss technical
+design and justification before code submission. PRs opened without an approved
+RFC may be labeled `rfc-required` and placed on hold.
+
+---
+
+## 4. Codebase Architecture
+
+The package source lives under `src/vllm_omni_torchtpu/`:
+
+* `platform.py`: `OmniTpuPlatform`, device setup, diffusion attention backend
+  selection, and profiler class hook.
+* `worker/`: `OmniTPUModelRunner`, `OmniTPUWorkerBase`, `TPUARModelRunner`,
+  `TPUARWorker`, and `TPUGenerationModelRunner`.
+* `patches/`: Runtime patches applied to `vllm-omni` (`patches/__init__.py` and
+  model-specific patch modules such as `patches/qwen3omni_thinker.py`).
+* `attention.py`, `rope.py`, `profiler.py`: Shared diffusion attention backends,
+  RoPE helpers, and profiler wrapper organized by functionality.
+* `tests/`: Packaging, platform, worker, patch, component, PR-gate, and
+  nightly/multichip tests mirroring `src/vllm_omni_torchtpu/`.
+
+---
+
+## 5. Upstream-First and Repo Boundaries
+
+* **Fix device-agnostic issues upstream**: Plain PyTorch/Python fixes or
+  optimizations that apply to other backends belong in `vllm-omni` (or `vllm`),
+  not as downstream monkey-patches (`R-3.4`). Only keep a temporary patch here
+  with a `TODO` linking an upstream issue/PR and stating its removal condition.
+* **Keep core TPU runtime in `vllm-torchtpu-core`**: Core TPU kernels, base
+  `TpuPlatform`, and `vllm_torchtpu.envs` remain in `vllm-torchtpu-core`. Code in
+  `vllm-omni-torchtpu` may assume `vllm-omni` is installed. Any core helper
+  imported from `vllm_torchtpu` must exist at both the `vllm-torchtpu-core`
+  floor and the `core-git` pin in `pyproject.toml`.
+* **Env knobs**: Use the `VLLM_OMNI_*` prefix (the prefix
+  `TpuPlatform.validate_environ` exempts from the unread-variable warning). Read
+  knobs locally via `vllm_torchtpu.envs.env_bool(name, default)()` and document
+  them in [docs/omni_plugin.md](docs/omni_plugin.md). Never mutate
+  `vllm_torchtpu.envs.environment_variables`, because `tpu_compiler.py` hashes
+  every entry into the compile key.
+* **Clean up on pin bumps**: At every `vllm-omni` or `vllm-torchtpu-core`
+  version bump in `pyproject.toml`, verify dependency bounds, audit existing
+  patches, and delete everything fixed or superseded upstream. Do not add
+  backward-compatibility shims for versions older than the pin (`R-2.5`).
+
+---
+
+## 6. Package Layout and Upstream API Contracts
+
+* **Mirror upstream `vllm_omni` layout**:
+  * Put workers and runners in `src/vllm_omni_torchtpu/worker/` (mirroring
+    `vllm_omni/platforms/<dev>/worker/`), not flat under `src/vllm_omni_torchtpu/`.
+  * Group runtime patches under `src/vllm_omni_torchtpu/patches/` rather than
+    adding top-level per-model patch files.
+  * Keep shared subsystem modules (`attention.py`, `rope.py`, `profiler.py`)
+    organized by functionality, not by model (`R-2.4`).
+* **Match upstream naming**: Keep the `Omni` prefix on shared bases
+  (`OmniTPUModelRunner`, `OmniTPUWorkerBase`) and drop it on leaf classes
+  (`TPUARModelRunner`, `TPUARWorker`, `TPUGenerationModelRunner`).
+* **Keep upstream inheritance and lifecycle boundaries**:
+  * Place capability mixins (such as `OmniConnectorModelRunnerMixin`) only on
+    leaf classes that implement the contract, never on shared bases.
+  * Match upstream init and output hooks (for example, initialize connectors in
+    `__init__` instead of `load_model`; attach connector outputs before async
+    wrapping rather than mutating private fields; normalize shared outputs on
+    the shared base).
+  * Where TPU diverges from an upstream base (such as not inheriting
+    `OmniGPUModelRunner` or silently dropping `additional_information`), document
+    the gap and unsupported features in the class docstring.
+* **Fail fast on capabilities, not names (`R-4.1`, `R-5.3`)**: Gate on
+  model/config capabilities or registry module paths, never on stage-name
+  allowlists or hardcoded model/pipeline name lists. Raise `NotImplementedError`
+  for unsupported upstream features instead of silently ignoring them or
+  returning wrong defaults.
+
+---
+
+## 7. Runtime Patches and Plugin Entry Points
+
+* **Entry points**: Register the platform through `vllm_omni.platform_plugins`
+  (and `vllm.platform_plugins` alias for coexistence per `pyproject.toml`).
+  Only add `vllm_omni.general_plugins` when early process-wide registration is
+  required, and do not duplicate patch installation across entry points/hooks
+  without a documented fallback reason.
+* **Lifecycle placement**: Install patches at the right lifecycle hook
+  (`OmniTpuPlatform.__init__`, `get_diffusion_attn_backend_cls`, `worker_init`,
+  or `load_model`) rather than hiding unrelated side effects inside selectors
+  when an explicit hook is available.
+* **Idempotency and composition**: Do not save `_tpu_orig_*` on classes or wrap
+  methods in unnecessary nested closures, which break when multiple patches or
+  inheritance stack. Attach a marker flag to the patched function/method when
+  idempotency is needed.
+* **Concise patch comments**: State (1) **Problem** (root cause), (2) **Scope /
+  Mechanism** (what is patched and how), and (3) **Removal condition / TODO**
+  (upstream issue or version pin). Keep benchmark logs in the PR body, not in
+  code comments.
+
+---
+
+## 8. Development & Testing Guidelines
+
+### Local & CI Tests
+
+See [docs/testing.md](docs/testing.md) and
+[.buildkite/README.md](.buildkite/README.md) for CPU verification commands,
+TPU test lanes, markers (`nightly`, `multichip`, `spawns_tpu_workers`,
+`tpu_test`), and Buildkite priority labels (`oncall-fix`, `run-full-ci`,
+`[skip ci]`).
+
+### Test Authoring Rules (`tests/`)
+
+* **Mirror `src/vllm_omni_torchtpu/` 1:1**: Keep `tests/test_omni_platform.py`
+  for platform registration and lifecycle only; put other tests where their
+  target lives:
+  * Packaging -> `tests/test_packaging.py`
+  * Patches -> `tests/patches/`
+  * Workers and runners -> `tests/worker/` and `tests/test_omni_runner.py`
+  * Dedicated subsystems -> `tests/test_<subsystem>.py` (for example,
+    `tests/test_profiler.py`)
+  * Models -> `tests/models/<model>/` with `test_<model>_components.py`
+    (on-TPU layer/kernel/patch parity; do not name TPU tests `*_unit.py`),
+    `test_<model>_pr.py` (fast PR-gate checks within the PR CI budget), and
+    `test_<model>_nightly.py` (E2E, golden parity, and multichip)
+* **Use real `vllm-omni` code, not mocks or fakes (`R-8.1`)**: Never add
+  `mock_omni` module trees or `_Fake*` classes. When `__init__` is too heavy,
+  construct the real class via `object.__new__(cls)` with only the attributes
+  needed, or use `pytest`'s `monkeypatch` fixture (not `unittest.mock.patch`).
+* **Test observable behavior**: Do not write AST/source-inspection tests,
+  brittle exact-log-string assertions, tautological checks, or tests of upstream
+  `vllm`/`vllm-omni` behavior that do not exercise TPU code.
+* **Keep tests focused and actionable (`R-8.2`, `R-8.3`, `R-8.8`)**:
+  * Test one behavior per function; use `@pytest.mark.parametrize` instead of
+    looping or chaining scenarios in one body.
+  * Use one `assert` per metric/condition with an actionable failure message
+    (no compound `assert a and b`).
+  * Run the model/module forward pass directly in the test body, not inside
+    assertion helpers. Reuse shared fixtures in
+    [tests/conftest.py](tests/conftest.py) and helpers in
+    [tests/omni_test_utils.py](tests/omni_test_utils.py).
+  * Patch regression tests should exercise the real failing path (using `xfail`
+    on the unpatched bug instead of canary tests that `pytest.fail` when a
+    toolchain bug is fixed upstream).
+  * Component and parity tests must compare against real CPU/fp32 references or
+    saved goldens across all channels with tight, named limits—never against
+    TPU tensors or uncalibrated distribution heuristics alone.
+
+---
+
+## 9. Pull Request & Review Lifecycle
+
+When opening a pull request, select the appropriate category prefix (`[Bugfix]`,
+`[Worker]`, `[Patch]`, `[Attention]`, `[Model]`, `[CI/Build]`, `[Doc]`,
+`[Misc]`) and complete the description, test plan, and checklist items.
+Standalone `CODEOWNERS` governance is pending post-split setup; see
+[docs/omni_plugin.md](docs/omni_plugin.md) for current contribution routing.
+
+---
+
+## 10. Policy on AI-Assisted Code
+
+We welcome the responsible use of AI tools to enhance engineering productivity,
+subject to upstream vLLM policies:
+
+1. **Full Submitter Accountability**: The human contributor is 100% responsible
+   for all submitted code. You must thoroughly review, understand, and validate
+   every changed line. "An AI wrote it" is not an acceptable response during code
+   review. If a reviewer asks why an operation is written a certain way, you must
+   be able to explain and defend the implementation.
+2. **No Low-Value "Busywork" Submissions**: Pull requests containing isolated,
+   trivial edits (such as a single typo fix, solitary whitespace adjustments, or
+   one-off formatting cleanups) waste reviewer bandwidth and will be closed.
+   Mechanical cleanups must be bundled with substantive engineering
+   contributions.
+3. **Transparent Disclosure & Verification**: Always state in your pull request
+   description when AI tools provided non-trivial assistance, and include the
+   exact test commands and passing verification output.
+4. **Commit Attribution**: Include standard commit trailers acknowledging AI
+   assistance alongside your DCO sign-off:
+
+```text
+Signed-off-by: Your Name <your.email@example.com>
+Co-authored-by: Claude <noreply@anthropic.com>
+Co-authored-by: GitHub Copilot <noreply@github.com>
+Co-authored-by: Antigravity <noreply@google.com>
+```
+
+---
+
+## 11. Community & Communication Channels
+
+* **GitHub Issues**: Use
+  [GitHub Issues](https://github.com/vllm-project/vllm-omni-torchtpu/issues)
+  for bug reports, model requests, and technical RFC proposals.
+
+---
+
+## 12. Reporting Security Vulnerabilities
+
+If you discover a potential security vulnerability in `vllm-omni-torchtpu`,
+please report it privately rather than opening a public issue.
+
+* **How to Report**: We follow upstream
+  [vLLM's Security Policy](https://github.com/vllm-project/vllm/blob/main/SECURITY.md).
+  Please report security issues privately using
+  [vLLM's vulnerability submission form](https://github.com/vllm-project/vllm/security/advisories/new).
+* **Scope**: Crashes caused by invalid inputs, excessive memory consumption, or
+  numerical divergence from untrusted models are normal bugs rather than
+  security vulnerabilities. Running untrusted model code is equivalent to
+  running arbitrary Python code.

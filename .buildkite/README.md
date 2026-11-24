@@ -100,3 +100,21 @@ wire that secret into `/opt/launcher/launch` for this pipeline. Changing only
 - `kubernetes/run.sh` and `kubernetes/common.sh`: Submit single-pod TPU jobs
   through `/opt/launcher/launch` and forward `VLLM_PLUGINS` and Buildkite Test
   Engine (`bktec`) settings.
+
+## Release and Nightly Image Publishing
+
+A separate pipeline, `vllm-omni-torchtpu-release`, publishes the
+`vllm-omni-torchtpu` wheel and sdist to PyPI and the
+`vllm/vllm-omni-torchtpu` images to Docker Hub. It runs on the locked
+`release-vllm-torchtpu` queue, never on the CI agents above. See
+[`release/README.md`](release/README.md) for how to cut a release, the nightly
+image, and the admin setup that the pipeline needs.
+
+- `release/pipeline.yml`: Release steps (preflight, build, check, approval,
+  publish) and the `main` nightly-image upload.
+- `pipeline_nightly_image.yml` and `scripts/publish_nightly_images.sh`: Build
+  the `dev` image on `vllm/vllm-torchtpu:nightly` and push
+  `vllm/vllm-omni-torchtpu:nightly`.
+- `scripts/build_wheel.sh`, `scripts/publish_wheel.sh`, and
+  `scripts/wheel_utils.py`: Build, check, and upload the wheel and sdist with
+  PyPI Trusted Publishing.

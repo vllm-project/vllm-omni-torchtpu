@@ -28,4 +28,5 @@ docs/
 .buildkite/
 !.buildkite/kubernetes/
 !.buildkite/scripts/
+!.buildkite/release/
 !.buildkite/pipeline*.yml

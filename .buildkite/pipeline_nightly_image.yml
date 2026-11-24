@@ -1,0 +1,38 @@
+# Copyright 2026 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Nightly vllm-omni-torchtpu image. Uploaded by the main-branch step of
+# .buildkite/release/pipeline.yml (the vllm-omni-torchtpu-release pipeline's
+# daily schedule), so it runs on the release queue, the only agent that can
+# read the Docker Hub token. See .buildkite/release/README.md.
+#
+# Builds docker/Dockerfile --target dev on vllm/vllm-torchtpu:nightly (pinned
+# by digest at build time), pushes it to GAR as nightly-YYYYMMDD and latest,
+# and to Docker Hub as nightly-YYYYMMDD-<commit>-<vllm> and nightly.
+
+steps:
+  - label: ":docker: Nightly omni image (GAR, and Docker Hub nightly)"
+    key: nightly_images
+    if: build.branch == "main"
+    agents:
+      queue: release-vllm-torchtpu
+    timeout_in_minutes: 180
+    env:
+      PUBLISH_DOCKERHUB: "1"
+      DOCKERHUB_REPO: "vllm/vllm-omni-torchtpu"
+      DOCKERHUB_USERNAME: "vllm"
+    secrets:
+      - DOCKERHUB_TOKEN_VLLM_OMNI_TORCHTPU
+    commands:
+      - bash .buildkite/scripts/publish_nightly_images.sh

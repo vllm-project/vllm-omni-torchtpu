@@ -1,0 +1,88 @@
+# Copyright 2026 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# vllm-omni-torchtpu-release: everything vllm-omni-torchtpu publishes, adapted
+# from vllm-project/vllm-torchtpu .buildkite/release/pipeline.yml. It runs only
+# in the TPU Release Buildkite cluster, on the release-vllm-torchtpu queue,
+# whose agent alone can read the Docker Hub token and mint PyPI tokens.
+#
+# The pipeline's settings upload this file from the build's own checkout, for
+# builds of main and releases/v* only, so a release branch runs the release
+# tooling it was cut with. README.md has the how-to and the admin setup.
+#
+#   main (scheduled)    nightly image: uploads ../pipeline_nightly_image.yml
+#                       (dev to GAR, and to Docker Hub as nightly)
+#   releases/vX.Y.Z     a release: build the images and the wheel once, check
+#                       them, wait for approval, then publish those same bytes
+#                       (plan_publish.py)
+
+steps:
+  - label: ":pipeline: Upload the nightly image pipeline"
+    key: nightly_images_upload
+    if: build.branch == "main"
+    agents:
+      queue: release-vllm-torchtpu
+    commands:
+      - buildkite-agent pipeline upload .buildkite/pipeline_nightly_image.yml
+
+  # --- A release ------------------------------------------------------------
+
+  - label: ":clipboard: Preflight: version, CI, PyPI, base image"
+    key: preflight
+    if: build.branch =~ /^releases\/v[0-9]+\.[0-9]+\.[0-9]+$/
+    agents:
+      queue: release-vllm-torchtpu
+    commands:
+      - bash .buildkite/release/preflight.sh
+
+  - label: ":docker: Build and stage the images"
+    key: build_images
+    depends_on: preflight
+    if: build.branch =~ /^releases\/v[0-9]+\.[0-9]+\.[0-9]+$/
+    agents:
+      queue: release-vllm-torchtpu
+    timeout_in_minutes: 180
+    commands:
+      - bash .buildkite/release/build_images.sh
+
+  - label: ":package: Build the vllm-omni-torchtpu wheel and sdist"
+    key: build_wheel
+    depends_on: preflight
+    if: build.branch =~ /^releases\/v[0-9]+\.[0-9]+\.[0-9]+$/
+    agents:
+      queue: release-vllm-torchtpu
+    env:
+      PUBLISH_PYPI: "vllm-omni-torchtpu"  # build_wheel.sh fails early if it's on PyPI
+    commands:
+      - bash .buildkite/scripts/build_wheel.sh
+
+  - label: ":mag: Check the wheel installs from PyPI"
+    key: check_wheels
+    depends_on: build_wheel
+    if: build.branch =~ /^releases\/v[0-9]+\.[0-9]+\.[0-9]+$/
+    agents:
+      queue: release-vllm-torchtpu
+    commands:
+      - bash .buildkite/release/check_wheels.sh
+
+  - label: ":pipeline: Plan the approval and publish"
+    key: plan_publish
+    depends_on:
+      - build_images
+      - check_wheels
+    if: build.branch =~ /^releases\/v[0-9]+\.[0-9]+\.[0-9]+$/
+    agents:
+      queue: release-vllm-torchtpu
+    commands:
+      - python3 .buildkite/release/plan_publish.py | buildkite-agent pipeline upload --no-interpolation

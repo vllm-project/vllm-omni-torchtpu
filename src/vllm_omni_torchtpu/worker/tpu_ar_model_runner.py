@@ -23,6 +23,9 @@ from vllm_omni.worker.omni_connector_model_runner_mixin import (
     needs_omni_connector,
 )
 
+from vllm_omni_torchtpu.patches.qwen3omni_talker import (
+    maybe_patch_qwen3_omni_talker,
+)
 from vllm_omni_torchtpu.patches.qwen3omni_thinker import (
     maybe_patch_qwen3_omni_thinker,
 )
@@ -75,6 +78,7 @@ class TPUARModelRunner(OmniTPUModelRunner, OmniConnectorModelRunnerMixin):
     def load_model(self) -> None:
         """Load the stage model, then refuse one whose hooks nobody would call."""
         maybe_patch_qwen3_omni_thinker(self.model_config.architectures)
+        maybe_patch_qwen3_omni_talker(self.model_config.architectures)
         super().load_model()
         model = self.get_model()
         has_unsupported_flags = [

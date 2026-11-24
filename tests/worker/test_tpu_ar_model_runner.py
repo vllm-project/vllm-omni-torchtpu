@@ -55,6 +55,10 @@ def _stub_tpu_model_runner(monkeypatch: pytest.MonkeyPatch) -> None:
         "vllm_omni_torchtpu.worker.tpu_ar_model_runner.maybe_patch_qwen3_omni_thinker",
         lambda *_: False,
     )
+    monkeypatch.setattr(
+        "vllm_omni_torchtpu.worker.tpu_ar_model_runner.maybe_patch_qwen3_omni_talker",
+        lambda *_: False,
+    )
 
 
 @pytest.fixture
@@ -183,6 +187,27 @@ def test_load_model_checks_per_step_hook_capabilities(
     else:
         with pytest.raises(NotImplementedError, match=error_match):
             tpu_ar_model_runner.load_model()
+
+
+def test_load_model_applies_talker_patch(
+    monkeypatch: pytest.MonkeyPatch,
+    tpu_ar_model_runner: TPUARModelRunner,
+) -> None:
+    seen_archs: list[Any] = []
+    monkeypatch.setattr(
+        "vllm_omni_torchtpu.worker.tpu_ar_model_runner.maybe_patch_qwen3_omni_talker",
+        lambda archs: seen_archs.append(archs) or True,
+    )
+    model = _StageModel(torch.zeros(1, 4))
+    monkeypatch.setattr(
+        TPUModelRunner,
+        "load_model",
+        lambda self: setattr(self, "model", model),
+    )
+
+    tpu_ar_model_runner.load_model()
+
+    assert seen_archs == [["Qwen3OmniMoeForConditionalGeneration"]]
 
 
 _HIDDEN = torch.arange(8.0).reshape(2, 4)

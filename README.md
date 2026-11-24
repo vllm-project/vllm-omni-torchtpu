@@ -13,6 +13,8 @@ helpers, multimodal autoregressive workers, and runtime model patches. Core TPU
 kernels and `TpuPlatform` remain in `vllm-torchtpu-core`. See the
 [plugin overview](docs/omni_plugin.md), [installation guide](docs/installation.md),
 [testing guide](docs/testing.md), and [roadmap](docs/ROADMAP.md) for details.
+[`benchmarks/`](benchmarks/README.md) holds quality benchmarks, starting with
+VBench for text-to-video models.
 
 ## Quickstart (Python 3.12)
 

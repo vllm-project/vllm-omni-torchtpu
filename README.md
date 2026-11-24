@@ -12,7 +12,8 @@ This package provides `OmniTpuPlatform`, TPU diffusion attention backends, RoPE
 helpers, multimodal autoregressive workers, and runtime model patches. Core TPU
 kernels and `TpuPlatform` remain in `vllm-torchtpu-core`. See the
 [plugin overview](docs/omni_plugin.md), [installation guide](docs/installation.md),
-[testing guide](docs/testing.md), and [roadmap](docs/ROADMAP.md) for details.
+[testing guide](docs/testing.md), [v7x serving recipes](docs/v7x_recipes.md),
+and [roadmap](docs/ROADMAP.md) for details.
 
 ## Quickstart (Python 3.12)
 

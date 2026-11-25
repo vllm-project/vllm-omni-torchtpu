@@ -3,7 +3,7 @@
 Maintainers adapted this guide from the omni installation sections of
 [`vllm-project/vllm-torchtpu`](https://github.com/vllm-project/vllm-torchtpu).
 In `vllm-torchtpu`, users enabled omni support with `--extra omni`. In
-`vllm-omni-torchtpu`, `vllm-omni==0.32.0rc1` and the CPU `torchaudio==2.11.0`
+`vllm-omni-torchtpu`, `vllm-omni==0.33.0rc1` and the CPU `torchaudio==2.11.0`
 pin are base dependencies, so a plain `uv pip install -e .` covers it.
 
 ## Python 3.12 Virtual Environment

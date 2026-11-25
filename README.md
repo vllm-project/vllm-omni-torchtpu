@@ -46,8 +46,9 @@ export VLLM_PLUGINS=torchtpu_omni,torchtpu_layers,vllm_omni_register_models
 
 `vllm-torchtpu-core` (`<= 0.33.x` and current `main`) registers `torchtpu` in
 both `vllm.platform_plugins` and `vllm_omni.platform_plugins`.
-`vllm-omni-torchtpu` registers `torchtpu_omni` in both groups so one allowlist
-selects `OmniTpuPlatform` and `vllm-torchtpu-core`'s `TpuPlatform`. When
+`vllm-omni-torchtpu` registers `torchtpu_omni` in those groups and in
+`vllm_omni.general_plugins` so one allowlist selects `OmniTpuPlatform`, the
+pre-engine Omni patches, and `vllm-torchtpu-core`'s `TpuPlatform`. When
 `VLLM_PLUGINS` is unset, `register_tpu_platform_alias` returns `None` so plain
 `vLLM` processes continue working without extra configuration. On TPU,
 `vllm-omni` processes without `VLLM_PLUGINS` still discover two omni platform

@@ -5,6 +5,10 @@ This package is the TPU platform plugin for
 through the `vllm_omni.platform_plugins` entry point `torchtpu_omni`
 (`vllm_omni_torchtpu:register_omni_tpu_platform`), which returns
 `vllm_omni_torchtpu.platform.OmniTpuPlatform` when TPU chips are present.
+It also registers the `vllm_omni.general_plugins` entry point `torchtpu_omni`
+(`vllm_omni_torchtpu:register_omni_general_plugins`), which vLLM-Omni runs in
+every process. On TPU, that hook applies the patches that must be in place
+before a diffusion engine starts.
 Model code comes from vLLM-Omni; TPU fixes are applied as runtime patches.
 
 ## Roadmap

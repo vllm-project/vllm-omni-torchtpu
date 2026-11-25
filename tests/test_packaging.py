@@ -27,6 +27,9 @@ EXPECTED_ENTRY_POINTS = {
     ("vllm_omni.platform_plugins", "torchtpu_omni"): (
         "vllm_omni_torchtpu:register_omni_tpu_platform"
     ),
+    ("vllm_omni.general_plugins", "torchtpu_omni"): (
+        "vllm_omni_torchtpu:register_omni_general_plugins"
+    ),
     ("vllm.platform_plugins", "torchtpu_omni"): (
         "vllm_omni_torchtpu:register_tpu_platform_alias"
     ),

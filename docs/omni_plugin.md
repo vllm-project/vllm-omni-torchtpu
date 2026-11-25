@@ -7,6 +7,12 @@ through the `vllm_omni.platform_plugins` entry point `torchtpu_omni`
 `vllm_omni_torchtpu.platform.OmniTpuPlatform` when TPU chips are present.
 Model code comes from vLLM-Omni; TPU fixes are applied as runtime patches.
 
+## Environment variables
+
+| Variable | Default | Description |
+| :--- | :--- | :--- |
+| `VLLM_OMNI_LTX2_PER_SAMPLE_TIMESTEP` | `False` | Opt-in. LTX-2 requests without a conditioning mask pass one timestep per sample (`(B,)`) to the transformer instead of one per token, so each block builds its AdaLN tables once per sample. Off by default because the bf16 TPU output differs from the per-token path and no on-device bf16 comparison yet shows that the difference comes from rounding alone. |
+
 ## Roadmap
 
 See [ROADMAP.md](ROADMAP.md).

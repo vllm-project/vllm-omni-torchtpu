@@ -7,6 +7,13 @@ through the `vllm_omni.platform_plugins` entry point `torchtpu_omni`
 `vllm_omni_torchtpu.platform.OmniTpuPlatform` when TPU chips are present.
 Model code comes from vLLM-Omni; TPU fixes are applied as runtime patches.
 
+## Environment variables
+
+| Variable | Default | Description |
+| :--- | :--- | :--- |
+| `VLLM_OMNI_RING_KERNEL` | `True` | Enables the Pallas ICI-DMA diffusion ring attention kernel on TPU v7. Set this variable to `0` to fall back to the `ppermute` residual ring attention path. |
+| `VLLM_OMNI_RING_FIXED_M` | `True` | Enables hybrid per-head fixed-m softmax in the Pallas ICI-DMA diffusion ring attention kernel. Set this variable to `0` to run online softmax on every head. |
+
 ## Roadmap
 
 See [ROADMAP.md](ROADMAP.md).

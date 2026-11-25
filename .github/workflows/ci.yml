@@ -79,6 +79,11 @@ jobs:
           with zipfile.ZipFile(wheels[0]) as zf:
               names = zf.namelist()
               assert any(
+                  n.startswith("vllm_omni_torchtpu/kernels/diffusion_attention/")
+                  and n.endswith(".py")
+                  for n in names
+              ), f"Missing kernels/diffusion_attention/ modules in wheel: {names}"
+              assert any(
                   n.startswith("vllm_omni_torchtpu/patches/") and n.endswith(".py")
                   for n in names
               ), f"Missing patches/ modules in wheel: {names}"

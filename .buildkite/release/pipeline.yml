@@ -19,7 +19,7 @@
 #
 # The pipeline's settings upload this file from the build's own checkout, for
 # builds of main and releases/v* only, so a release branch runs the release
-# tooling it was cut with. README.md has the how-to and the admin setup.
+# tooling it was cut with. README.md has the how-to.
 #
 #   main (scheduled)    nightly image: uploads ../pipeline_nightly_image.yml
 #                       (dev to GAR, and to Docker Hub as nightly)

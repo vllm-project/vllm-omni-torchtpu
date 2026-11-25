@@ -107,8 +107,8 @@ A separate pipeline, `vllm-omni-torchtpu-release`, publishes the
 `vllm-omni-torchtpu` wheel and sdist to PyPI and the
 `vllm/vllm-omni-torchtpu` images to Docker Hub. It runs on the locked
 `release-vllm-torchtpu` queue, never on the CI agents above. See
-[`release/README.md`](release/README.md) for how to cut a release, the nightly
-image, and the admin setup that the pipeline needs.
+[`release/README.md`](release/README.md) for how to cut a release and how the
+nightly image is built.
 
 - `release/pipeline.yml`: Release steps (preflight, build, check, approval,
   publish) and the `main` nightly-image upload.

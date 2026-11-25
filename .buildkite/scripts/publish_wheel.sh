@@ -31,10 +31,8 @@
 #   4. Upload the files and their attestations with twine.
 #   5. Wait until the release is installable from PyPI.
 #
-# One-time PyPI setup (see .buildkite/release/README.md):
-#   pypi.org project vllm-omni-torchtpu -> Publishing -> Add a new publisher ->
-#   Google Cloud -> email: <service-account>@<project>.iam.gserviceaccount.com
-#   (use a "pending publisher" if the project doesn't exist yet).
+# The PyPI project trusts this VM's service account as a Google Cloud
+# Trusted Publisher; no PyPI credential is stored anywhere.
 #
 # Environment:
 #   PUBLISH_PYPI   PyPI project name; the files must match it.

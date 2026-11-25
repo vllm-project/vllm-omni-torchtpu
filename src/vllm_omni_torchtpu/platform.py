@@ -38,6 +38,8 @@ class OmniTpuPlatform(OmniPlatform, TpuPlatform):
 
     # Diffusion worker world size recorded by set_device (see dist_backend).
     _worker_world_size: int = 1
+    # Diffusion worker ring attention degree recorded before set_device.
+    _diffusion_ring_degree: int = 1
 
     @property
     def dist_backend(self) -> str:
@@ -56,17 +58,14 @@ class OmniTpuPlatform(OmniPlatform, TpuPlatform):
         head_size: int,
         allow_trtllm_default: bool = False,
     ) -> str:
+        from vllm_omni_torchtpu.attention import uses_tpu_flash_diffusion_backend
         from vllm_omni_torchtpu.patches import apply_omni_model_specific_patches
 
         apply_omni_model_specific_patches()
-        if selected_backend is not None and selected_backend.upper() in (
-            "SDPA",
-            "TPU_SDPA",
-            "TORCH_SDPA",
-        ):
-            backend = "vllm_omni_torchtpu.attention.TpuSDPABackend"
-        else:
+        if uses_tpu_flash_diffusion_backend(selected_backend):
             backend = "vllm_omni_torchtpu.attention.TpuFlashAttentionBackend"
+        else:
+            backend = "vllm_omni_torchtpu.attention.TpuSDPABackend"
         logger.info_once(
             "Using %s for diffusion attention (requested: %s).",
             backend,
@@ -97,6 +96,14 @@ class OmniTpuPlatform(OmniPlatform, TpuPlatform):
     @classmethod
     def supports_talker_mtp_graph_capture(cls) -> bool:
         return False
+
+    @classmethod
+    def get_diffusion_worker_cls(cls) -> str:
+        from vllm_omni_torchtpu.patches import _patch_diffusion_worker_init_device
+
+        worker_cls: str = super().get_diffusion_worker_cls()
+        _patch_diffusion_worker_init_device()
+        return worker_cls
 
     @classmethod
     def set_device(cls, device: torch.device | int) -> None:

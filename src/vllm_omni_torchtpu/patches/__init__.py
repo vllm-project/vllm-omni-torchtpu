@@ -71,6 +71,10 @@ def apply_omni_tpu_patches() -> None:
 
     os.environ.setdefault("VLLM_OMNI_ASYNC_OUTPUT_TIMEOUT", "1800.0")
     logger.info("Applied TPU patch: extended VLLM_OMNI_ASYNC_OUTPUT_TIMEOUT to 1800s.")
+    # Opt-in, env-gated engine-side Wan hooks (post-import, no-op unless set).
+    from vllm_omni_torchtpu.wan_opt import apply_wan_opt_engine_patches
+
+    apply_wan_opt_engine_patches()
 
 
 @run_once
@@ -87,6 +91,10 @@ def apply_omni_model_specific_patches() -> None:
     _patch_wan_fresh_timestep()
     _patch_sdpa_fallback_dispatch()
     _patch_ltx2_vocoder_cpu_init()
+    # Opt-in, env-gated Wan optimizations (no-op unless their env vars are set).
+    from vllm_omni_torchtpu.wan_opt import apply_wan_opt_patches
+
+    apply_wan_opt_patches()
 
 
 def _patch_diffusion_ipc_cpu_pack() -> None:
